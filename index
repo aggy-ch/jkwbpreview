@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WBP Review — JeevanKey</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#101720;--paper:#fff;--field:#f4f6f8;--line:#d9dfe6;--muted:#5d6b7a;
+--navy:#0C447C;--amber:#B26A00;--red:#A31D1D;--ok:#1F6B4A}
+*{box-sizing:border-box}
+body{margin:0;background:#e9edf1;color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 90px}
+.masthead{background:var(--navy);color:#fff;padding:13px 16px;border-radius:4px}
+.masthead h1{font-size:16px;margin:0;font-weight:600}
+.masthead p{margin:3px 0 0;font-size:12px;opacity:.8}
+.who{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.09em;background:#fff;border:1px solid var(--line);border-radius:4px;padding:9px 13px;margin-top:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.who b{color:var(--navy)}
+.hint{font-size:12px;color:var(--muted);font-style:italic;margin:-2px 0 8px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:16px;margin-top:12px}
+.sec{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px;margin:0 0 14px;display:flex;justify-content:space-between;gap:8px}
+.req{color:var(--red);font-weight:600}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 4px}
+input,select,textarea{width:100%;font-family:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--line);border-radius:3px;background:var(--field);color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--navy);outline-offset:1px;background:#fff}
+input.miss,textarea.miss{border-color:var(--red);background:#fdeeee}
+textarea{resize:vertical;min-height:60px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.row{display:grid;gap:12px;margin-bottom:12px}.r2{grid-template-columns:1fr 1fr}
+@media(max-width:560px){.r2{grid-template-columns:1fr}}
+.draft{background:#f7f9fb;border:1px solid var(--line);border-left:3px solid var(--navy);padding:13px 15px;font-size:14px}
+.draft h4{margin:0 0 8px;font-size:11px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.09em;color:var(--navy)}
+.draft .flagged{color:var(--red);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:13px}
+.draft .check{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:13px;color:var(--amber)}
+.triage{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.triage input{position:absolute;opacity:0;pointer-events:none}
+.triage label{display:block;border:1px solid var(--line);border-radius:3px;padding:12px;cursor:pointer;background:var(--field);font-size:14px;font-weight:600;color:var(--ink);margin:0;text-align:center}
+.triage label small{display:block;font-weight:400;font-size:11px;color:var(--muted);margin-top:2px}
+#t-routine:checked+label{background:var(--ok);border-color:var(--ok);color:#fff}#t-routine:checked+label small{color:#d6ede1}
+#t-priority:checked+label{background:var(--amber);border-color:var(--amber);color:#fff}#t-priority:checked+label small{color:#f6e4c8}
+.budget{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}.budget b{font-size:13px}
+.count{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}.count.full{color:var(--red)}
+.slot{border-left:3px solid var(--navy);padding-left:10px;margin-bottom:10px}.slot.sec2{border-left-color:var(--line)}
+.panel{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.panel:last-child{border-bottom:none}.panel b{font-size:14px;font-weight:500}.panel select{width:auto;font-size:13px;padding:5px 8px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips label{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--field);border-radius:20px;padding:7px 13px;font-size:13px;font-weight:500;cursor:pointer;margin:0}
+.chips input{width:auto;margin:0}.chips label:has(input:checked){background:#eaf1f8;border-color:var(--navy);color:var(--navy)}
+.qlist label.q{display:flex;gap:9px;align-items:flex-start;font-size:14px;font-weight:400;padding:6px 0;cursor:pointer}
+.qlist input[type=checkbox]{width:auto;margin:3px 0 0;flex:none}
+.qgroup{margin-bottom:8px}.qgroup b{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-family:'IBM Plex Mono',monospace}
+.note{background:#fff8e8;border-left:3px solid var(--amber);padding:10px 12px;font-size:13px;margin-bottom:12px}
+.hide{display:none}
+.gate{max-width:360px;margin:60px auto;text-align:center}
+.gate .card{padding:24px}
+.actions{position:sticky;bottom:0;background:#e9edf1;padding:12px 0 0;margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line)}
+button{font-family:inherit;font-size:15px;font-weight:600;padding:12px 18px;border-radius:3px;border:1px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;flex:1;min-width:130px}
+button.ghost{background:#fff;color:var(--navy)}
+#err{color:var(--red);font-size:13px;font-weight:600;margin:8px 0 0;width:100%}
+.done{background:#eaf5ef;border:1px solid var(--ok);color:var(--ok);padding:16px;border-radius:4px;margin-top:14px;font-weight:600;text-align:center}
+.load{text-align:center;color:var(--muted);padding:40px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===== passcode gate ===== -->
+<div id="gate" class="gate">
+  <div class="masthead"><h1>JeevanKey — WBP Review</h1><p>Panel access</p></div>
+  <div class="card">
+    <label for="pass">Passcode</label>
+    <input id="pass" type="password" autocomplete="off">
+    <button style="margin-top:12px;width:100%" onclick="unlock()">Open</button>
+    <p id="gateErr" style="color:var(--red);font-size:13px;margin:8px 0 0"></p>
+  </div>
+</div>
+
+<!-- ===== app ===== -->
+<div id="app" class="hide">
+  <div class="masthead"><h1>Whole Body Profile — Review</h1><p>Immuno Diagnostics · JeevanKey expert panel</p></div>
+  <div class="who"><span>Reviewer: <b id="whoName">—</b></span><span>Ref <b id="whoRef">—</b></span><span>Per review: <b id="whoRate">—</b></span></div>
+
+  <div id="loading" class="load">Loading report…</div>
+
+  <form id="f" class="hide">
+    <div class="card">
+      <p class="sec"><span>Report</span></p>
+      <div class="row r2">
+        <div><label>Reference No.</label><input class="mono" id="ref" readonly></div>
+        <div><label>Lab</label><input class="mono" id="lab" readonly></div>
+      </div>
+      <div class="row r2">
+        <div><label>Age / Sex</label><input id="age" readonly></div>
+        <div><label>Patient</label><input id="pname" readonly></div>
+      </div>
+      <div class="draft" id="draftBox"></div>
+    </div>
+
+    <!-- DOCTOR -->
+    <div id="v-doctor" class="hide">
+      <div class="card"><p class="sec"><span>Panels &amp; samples</span></p>
+        <p class="hint">Set any panel that arrived as an extra sample under this ref number.</p>
+        <div id="panels"></div>
+      </div>
+      <div class="card"><p class="sec"><span>Triage</span><span class="req">required</span></p>
+        <div class="triage">
+          <input type="radio" name="tri" id="t-routine" checked><label for="t-routine">Routine<small>Normal sheet</small></label>
+          <input type="radio" name="tri" id="t-priority"><label for="t-priority">Priority<small>Must see a doctor</small></label>
+        </div>
+        <div id="winbox" class="hide" style="margin-top:12px"><label>Within how many days</label>
+          <select id="window"><option value="3">3 days</option><option value="7" selected>7 days</option><option value="15">15 days</option></select>
+        </div>
+      </div>
+      <div class="card"><p class="sec"><span>Findings</span><span class="req">at least 1</span></p>
+        <p class="hint">Write patient-facing meaning in Hinglish.</p>
+        <div class="budget"><b>Most important</b><span class="count" id="c1">0 of 2</span></div>
+        <div class="slot"><div class="row r2"><div><label>Value</label><input class="mono" id="p1v"></div><div><label>Meaning</label><input id="p1m"></div></div></div>
+        <div class="slot"><div class="row r2"><div><label>Value</label><input class="mono" id="p2v"></div><div><label>Meaning</label><input id="p2m"></div></div></div>
+        <div class="budget" style="margin-top:16px"><b>Worth watching</b><span class="count" id="c2">0 of 3</span></div>
+        <div class="slot sec2"><input id="s1"></div><div class="slot sec2"><input id="s2"></div><div class="slot sec2"><input id="s3"></div>
+      </div>
+      <div class="card"><p class="sec"><span>Normal — nothing to worry about</span></p>
+        <p class="hint">Tick systems that are normal. The sheet builds the sentence.</p>
+        <div class="chips" id="normalChips"></div>
+      </div>
+      <div class="card"><p class="sec"><span>Questions for the patient's own doctor</span></p>
+        <p class="hint">Updates based on what you flagged. Tick the ones that fit.</p>
+        <div id="qlist"></div>
+        <div style="margin-top:8px"><input id="qx" placeholder="Add your own (Hinglish, optional)"></div>
+      </div>
+      <div class="card"><p class="sec"><span>You</span></p>
+        <div class="row r2"><div><label>Name</label><input id="doc_name"></div><div><label>Minutes</label><input class="mono" id="doc_min" type="number" min="0"></div></div>
+      </div>
+    </div>
+
+    <!-- DIETICIAN -->
+    <div id="v-dietician" class="hide">
+      <div class="card"><p class="sec"><span>Diet recommendation</span><span class="req">required</span></p>
+        <div class="note">Doctor reviews separately. Write from the report. No medicine/supplement names. Hinglish.</div>
+        <div class="row"><label>What to change in food</label><textarea id="diet" style="min-height:110px"></textarea></div>
+        <div class="row r2"><div><label>Name</label><input id="die_name"></div><div><label>Minutes</label><input class="mono" id="die_min" type="number" min="0"></div></div>
+      </div>
+    </div>
+
+    <!-- YOGA -->
+    <div id="v-yoga" class="hide">
+      <div class="card"><p class="sec"><span>Lifestyle recommendation</span><span class="req">required</span></p>
+        <div class="note">Doctor reviews separately. Before strenuous practice add "doctor se poochh kar". Hinglish.</div>
+        <div class="row"><label>What to do in daily routine</label><textarea id="yoga" style="min-height:110px"></textarea></div>
+        <div class="row r2"><div><label>Name</label><input id="yog_name"></div><div><label>Minutes</label><input class="mono" id="yog_min" type="number" min="0"></div></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" onclick="submitReview()">Submit review</button>
+      <p id="err"></p>
+    </div>
+  </form>
+
+  <div id="out"></div>
+</div>
+</div>
+
+<script>
+/* ======= CONFIG — paste your deployed Apps Script /exec URL ======= */
+var API_URL = 'https://script.google.com/macros/s/AKfycby-8iUe7y_KdMVGhoDWhV5hNtsnNi2X1dxEPdojzDsqZG-44x8yMCGF3-ziJ3_dFJA/exec';
+/* ================================================================= */
+
+var P=new URLSearchParams(location.search);
+var ROLE=(P.get('role')||'doctor').toLowerCase();
+var REF=P.get('ref')||'';
+var RATES={doctor:75,dietician:45,yoga:30};
+var LABEL={doctor:'Doctor',dietician:'Dietician',yoga:'Yoga Therapist'};
+var $=function(id){return document.getElementById(id)};
+var esc=function(s){return String(s||'').replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})};
+var PASS='';
+
+var QMAP={
+  anaemia:{label:'Anaemia / Hb',qs:["Khoon ki kami ka kaaran kya hai — khana, absorption, ya kuch aur?","Kis tarah ka khana badhaun?","Kitne din baad Hb dobara check karun?"]},
+  wbc:{label:'Low white cells',qs:["White cells kam kyun hain?","Kya jaanch zaroori hai?"]},
+  deficiency:{label:'Vitamin D / B12',qs:["Yeh kami kis wajah se hui?","Khane se theek ho sakti hai?","Kitne mahine mein dobara check?"]},
+  thyroid:{label:'Thyroid',qs:["Kya thakan/wajan isi se juda hai?","Agli jaanch kab?"]},
+  sugar:{label:'Sugar / HbA1c',qs:["Dawai se pehle diet se kitna farak?","Rozana kis cheez par nazar rakhun?"]},
+  lipid:{label:'Cholesterol',qs:["Dawai zaroori hai ya pehle lifestyle?","Kitne din baad dobara dekhein?"]},
+  general:{label:'General',qs:["Yeh values kis wajah se aisi hain?","Kya koi purani dawai iska kaaran ho sakti hai?","Kya aur koi jaanch zaroori hai?"]}
+};
+
+function unlock(){
+  PASS=$('pass').value.trim();
+  if(!PASS){$('gateErr').textContent='Enter passcode.';return}
+  if(!REF){$('gateErr').textContent='No report ref in link.';return}
+  $('gate').classList.add('hide');$('app').classList.remove('hide');
+  loadReport();
+}
+
+function loadReport(){
+  $('whoName').textContent=LABEL[ROLE]||'Doctor';
+  $('whoRef').textContent=REF;
+  $('whoRate').textContent='₹'+(RATES[ROLE]||75);
+  fetch(API_URL+'?action=getReport&ref='+encodeURIComponent(REF)+'&pass='+encodeURIComponent(PASS))
+    .then(function(r){return r.json()})
+    .then(function(res){
+      if(!res.ok){$('loading').textContent='Could not load report: '+(res.error||'error');return}
+      render(res.report);
+    })
+    .catch(function(e){$('loading').textContent='Network error. Check the link and try again.'});
+}
+
+function render(rep){
+  $('loading').classList.add('hide');$('f').classList.remove('hide');
+  $('v-'+(RATES[ROLE]?ROLE:'doctor')).classList.remove('hide');
+  $('ref').value=rep.Ref||REF; $('lab').value=rep.Lab||'';
+  $('age').value=(rep.Age||'')+' / '+(rep.Sex||''); $('pname').value=rep.Patient||'';
+
+  var flags=String(rep.Flagged||'').split('|').map(function(s){return s.trim()}).filter(Boolean);
+  $('draftBox').innerHTML='<h4>From report — out of range</h4>'
+    + flags.map(function(x){return '<div class="flagged">'+esc(x)+'</div>'}).join('')
+    + (rep.Normal?'<div class="check"><b>Normal:</b> '+esc(rep.Normal)+'</div>':'')
+    + (ROLE==='doctor'&&rep.Note?'<div class="check">⚑ '+esc(rep.Note)+'</div>':'');
+
+  if(ROLE==='doctor'||!RATES[ROLE]) setupDoctor(rep);
+}
+
+function setupDoctor(rep){
+  var PANELS={bsf:'Sugar Fasting',urine:'Urine Routine',esr:'ESR',testo:'Testosterone',psa:'PSA',crp:'CRP / RF'};
+  $('panels').innerHTML=Object.keys(PANELS).map(function(k){
+    return '<div class="panel"><b>'+PANELS[k]+'</b><select id="s-'+k+'">'
+      +'<option value="no">Not in profile</option><option value="done">Done</option>'
+      +'<option value="extra">Extra sample received</option>'
+      +'<option value="notsent">Sample not sent</option><option value="unfit">Sample not usable</option></select></div>';
+  }).join('');
+  var SYS=['Sugar','Liver','Kidney','Thyroid','Cholesterol','Blood count'];
+  $('normalChips').innerHTML=SYS.map(function(s){return '<label><input type="checkbox" class="nc" value="'+s+'"><span>'+s+'</span></label>'}).join('');
+  document.querySelectorAll('input[name=tri]').forEach(function(r){r.addEventListener('change',function(){$('winbox').classList.toggle('hide',!$('t-priority').checked)})});
+  ['p1v','p2v','s1','s2','s3'].forEach(function(i){$(i).addEventListener('input',cnt)});
+  renderQ();
+}
+function cnt(){
+  var a=[$('p1v').value,$('p2v').value].filter(function(v){return v.trim()}).length;
+  var b=[$('s1').value,$('s2').value,$('s3').value].filter(function(v){return v.trim()}).length;
+  $('c1').textContent=a+' of 2';$('c1').className='count'+(a>=2?' full':'');
+  $('c2').textContent=b+' of 3';$('c2').className='count'+(b>=3?' full':'');
+  renderQ();
+}
+function detect(){
+  var t=[$('p1v').value,$('p2v').value,$('s1').value,$('s2').value,$('s3').value].join(' ').toLowerCase();
+  var k=new Set();
+  if(/h[ab]|haemo|anaem|khoon/.test(t))k.add('anaemia');
+  if(/tlc|white|wbc|neutro/.test(t))k.add('wbc');
+  if(/vit|b12|defic/.test(t))k.add('deficiency');
+  if(/tsh|thyroid|t3|t4/.test(t))k.add('thyroid');
+  if(/sugar|hba1c|glucose/.test(t))k.add('sugar');
+  if(/chol|ldl|hdl|triglyc|lipid/.test(t))k.add('lipid');
+  k.add('general');return [].concat(Array.from(k));
+}
+function renderQ(){
+  if(!$('qlist'))return;
+  $('qlist').innerHTML=detect().map(function(key){
+    var g=QMAP[key];
+    return '<div class="qgroup"><b>'+esc(g.label)+'</b>'+g.qs.map(function(q){
+      return '<label class="q"><input type="checkbox" class="qc" value="'+esc(q)+'"><span>'+esc(q)+'</span></label>'}).join('')+'</div>';
+  }).join('');
+}
+function normalSentence(){
+  var on=[].slice.call(document.querySelectorAll('.nc:checked')).map(function(c){return c.value.toLowerCase()});
+  if(!on.length)return '';
+  return on.join(', ')+' — inme chinta ki baat nahi hai.';
+}
+
+function validate(){
+  document.querySelectorAll('.miss').forEach(function(e){e.classList.remove('miss')});
+  var bad=[];
+  if(ROLE==='dietician'){if(!$('diet').value.trim())bad.push('diet')}
+  else if(ROLE==='yoga'){if(!$('yoga').value.trim())bad.push('yoga')}
+  else{if(!$('p1v').value.trim())bad.push('p1v')}
+  bad.forEach(function(id){$(id).classList.add('miss')});
+  $('err').textContent=bad.length?'This field is required.':'';
+  return !bad.length;
+}
+function collect(){
+  var role=RATES[ROLE]?ROLE:'doctor';
+  var out={ref:REF,role:role,pass:PASS,payout:0};
+  if(role==='dietician'){out.reviewer=$('die_name').value;out.minutes=$('die_min').value;out.payout=(+$('die_min').value||0)*45;out.data={diet:$('diet').value}}
+  else if(role==='yoga'){out.reviewer=$('yog_name').value;out.minutes=$('yog_min').value;out.payout=(+$('yog_min').value||0)*30;out.data={yoga:$('yoga').value}}
+  else{
+    out.reviewer=$('doc_name').value;out.minutes=$('doc_min').value;out.payout=(+$('doc_min').value||0)*75;
+    out.data={
+      triage:$('t-priority').checked?'priority':'routine',window:$('window').value,
+      primary:[[$('p1v').value,$('p1m').value],[$('p2v').value,$('p2m').value]].filter(function(x){return x[0].trim()}),
+      secondary:[$('s1').value,$('s2').value,$('s3').value].filter(function(v){return v.trim()}),
+      normal:normalSentence(),
+      questions:[].slice.call(document.querySelectorAll('.qc:checked')).map(function(c){return c.value}).concat($('qx').value.trim()?[$('qx').value.trim()]:[]),
+      samples:(function(){var s={};document.querySelectorAll('[id^=s-]').forEach(function(x){s[x.id.slice(2)]=x.value});return s})()
+    };
+  }
+  return out;
+}
+function submitReview(){
+  if(!validate())return;
+  var body=collect();
+  $('err').textContent='Saving…';
+  fetch(API_URL,{method:'POST',body:JSON.stringify(Object.assign({action:'saveReview'},body))})
+    .then(function(r){return r.json()})
+    .then(function(res){
+      if(!res.ok){$('err').textContent='Save failed: '+(res.error||'error');return}
+      $('f').classList.add('hide');
+      $('out').innerHTML='<div class="done">Review submitted — Ref '+esc(REF)+
+        '<br><span style="font-weight:400;font-size:13px">₹'+body.payout+' for this review.</span></div>';
+    })
+    .catch(function(){$('err').textContent='Network error. Try again.'});
+}
+</script>
+</body>
+</html>
