@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dispatch — JeevanKey</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#101720;--paper:#fff;--field:#f4f6f8;--line:#d9dfe6;--muted:#5d6b7a;--navy:#0C447C;--amber:#B26A00;--red:#A31D1D;--ok:#1F6B4A}
+*{box-sizing:border-box}
+body{margin:0;background:#eef1f4;color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:820px;margin:0 auto;padding:16px 14px 60px}
+.masthead{background:var(--navy);color:#fff;padding:14px 16px;border-radius:4px}
+.masthead h1{font-size:16px;margin:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:16px;margin-top:12px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:0 0 4px}
+input{width:100%;font-family:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--line);border-radius:3px;background:var(--field)}
+button{font-family:inherit;font-size:14px;font-weight:600;padding:10px 16px;border-radius:3px;border:1px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer}
+button.ghost{background:#fff;color:var(--navy)}
+.gate{max-width:340px;margin:60px auto;text-align:center}
+
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);font-size:14px}
+th{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
+.dot{display:inline-block;width:22px;height:22px;border-radius:50%;text-align:center;line-height:22px;font-size:12px;font-weight:700}
+.dot.on{background:#e0f0e8;color:var(--ok)}
+.dot.off{background:#f2e3e3;color:var(--red)}
+.n{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+.mkbtn{padding:6px 12px;font-size:13px}
+
+/* printable sheet */
+#sheet{margin-top:16px}
+.psheet{background:#fff;border:1px solid var(--line);padding:26px;font-size:14px;max-width:600px;margin:0 auto}
+.psheet .hd{border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:14px}
+.psheet .hd h2{margin:0;font-size:18px}
+.psheet .hd p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.psheet .box{border:1px solid var(--ink);padding:9px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;margin-bottom:16px}
+.psheet h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 7px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.psheet ul{margin:0;padding-left:18px}.psheet li{margin-bottom:6px}
+.psheet .val{font-family:'IBM Plex Mono',monospace;font-weight:600}
+.flag{border-left:4px solid var(--amber);background:#fff8e8;padding:11px 13px;margin:14px 0;font-weight:600}
+.psheet .coupon{border:2px dashed var(--ink);padding:14px;text-align:center;margin-top:20px}
+.psheet .coupon .code{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;letter-spacing:.06em;margin:6px 0}
+.psheet .foot{font-size:11px;color:var(--muted);margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+.gen{font-size:10px;color:#9aa6b2;font-style:italic}
+
+@media print{body{background:#fff}.noprint{display:none!important}.psheet{border:none;padding:0;max-width:none}.wrap{padding:0;max-width:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="gate" class="gate">
+  <div class="masthead"><h1>JeevanKey — Dispatch</h1></div>
+  <div class="card">
+    <label for="pass">Passcode</label>
+    <input id="pass" type="password">
+    <button style="margin-top:12px;width:100%" onclick="unlock()">Open</button>
+    <p id="gerr" style="color:var(--red);font-size:13px"></p>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="masthead noprint"><h1>Dispatch board — today</h1></div>
+
+  <div class="card noprint">
+    <label>Add ref numbers to check (comma-separated), or leave blank for today's submitted refs</label>
+    <div style="display:flex;gap:8px">
+      <input id="refs" placeholder="2607133031, 2607131794">
+      <button onclick="loadBoard()" style="flex:none">Refresh</button>
+    </div>
+    <table id="board"><thead><tr><th>Ref</th><th>Doctor</th><th>Dietician</th><th>Yoga</th><th>Status</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <div id="sheet"></div>
+</div>
+</div>
+
+<script>
+var API_URL='PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';
+var $=function(id){return document.getElementById(id)};
+var esc=function(s){return String(s||'').replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})};
+var PASS='';
+
+/* generic fallbacks when a role hasn't reviewed — NO name attached */
+var GENERIC={
+  normal:'Baaki values normal range mein hain. Detail ke liye apne doctor se baat karein.',
+  questions:['Yeh values kis wajah se aisi hain?','Kya aur koi jaanch zaroori hai?','Agli baar poori jaanch kab karwani chahiye?'],
+  diet:'Santulit khana khayein — sabziyan, dal, saabut anaj. Zyada tala-bhuna aur meetha kam karein. Paani theek matra mein piyein.',
+  yoga:'Roz thodi walking ya halki stretching karein. Neend poori lein. Koi bhi bhaari abhyas shuru karne se pehle apne doctor se poochh lein.'
+};
+
+function unlock(){
+  PASS=$('pass').value.trim();
+  if(!PASS){$('gerr').textContent='Enter passcode.';return}
+  $('gate').style.display='none';$('app').style.display='block';
+  loadBoard();
+}
+
+function loadBoard(){
+  fetch(API_URL+'?action=status&pass='+encodeURIComponent(PASS))
+    .then(function(r){return r.json()}).then(function(res){
+      if(!res.ok){alert('Error: '+res.error);return}
+      var refs=Object.keys(res.status||{});
+      var typed=$('refs').value.split(',').map(function(s){return s.trim()}).filter(Boolean);
+      typed.forEach(function(r){if(refs.indexOf(r)<0)refs.push(r)});
+      var tb=$('board').querySelector('tbody');tb.innerHTML='';
+      if(!refs.length){tb.innerHTML='<tr><td colspan="6" class="n">No reviews submitted today yet.</td></tr>';return}
+      refs.forEach(function(ref){
+        var s=res.status[ref]||{doctor:false,dietician:false,yoga:false};
+        var done=[s.doctor,s.dietician,s.yoga].filter(Boolean).length;
+        var label=done===3?'Complete':done===0?'None — dispatch plain':done+' of 3';
+        tb.innerHTML+='<tr><td class="ref">'+esc(ref)+'</td>'
+          +cell(s.doctor)+cell(s.dietician)+cell(s.yoga)
+          +'<td class="n">'+label+'</td>'
+          +'<td>'+(done>0?'<button class="mkbtn" onclick="makeSheet(\''+esc(ref)+'\')">Make sheet</button>':'')+'</td></tr>';
+      });
+    }).catch(function(){alert('Network error.')});
+}
+function cell(on){return '<td><span class="dot '+(on?'on':'off')+'">'+(on?'✓':'–')+'</span></td>'}
+
+function makeSheet(ref){
+  fetch(API_URL+'?action=getReviews&ref='+encodeURIComponent(ref)+'&pass='+encodeURIComponent(PASS))
+    .then(function(r){return r.json()}).then(function(res){
+      if(!res.ok){alert('Error: '+res.error);return}
+      renderSheet(res.report||{}, res.reviews||{});
+    });
+}
+
+function renderSheet(rep, rv){
+  var doc=rv.doctor?rv.doctor.data:null;
+  var die=rv.dietician?rv.dietician.data:null;
+  var yog=rv.yoga?rv.yoga.data:null;
+
+  var flag='';
+  if(doc && doc.triage==='priority')
+    flag='<div class="flag">Yeh report '+esc(doc.window)+' din ke andar apne doctor ko dikhana zaroori hai.</div>';
+
+  var pr = doc && doc.primary && doc.primary.length
+    ? '<h3>Sabse zaroori</h3><ul>'+doc.primary.map(function(p){return '<li><span class="val">'+esc(p[0])+'</span>'+(p[1]?' — '+esc(p[1]):'')+'</li>'}).join('')+'</ul>' : '';
+  var se = doc && doc.secondary && doc.secondary.length
+    ? '<h3>Dhyan rakhne wali</h3><ul>'+doc.secondary.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>' : '';
+
+  var normal = doc && doc.normal ? doc.normal : GENERIC.normal;
+  var normalGen = !(doc && doc.normal);
+
+  var qs = (doc && doc.questions && doc.questions.length) ? doc.questions : GENERIC.questions;
+  var qGen = !(doc && doc.questions && doc.questions.length);
+  var qHtml='<h3>Apne doctor se poochhein '+(qGen?'<span class="gen">(general)</span>':'')+'</h3><ul>'+qs.map(function(q){return '<li>'+esc(q)+'</li>'}).join('')+'</ul>';
+
+  var dietTxt = die && die.diet ? die.diet : GENERIC.diet;
+  var dietGen = !(die && die.diet);
+  var yogaTxt = yog && yog.yoga ? yog.yoga : GENERIC.yoga;
+  var yogaGen = !(yog && yog.yoga);
+
+  var names=[];
+  if(rv.doctor && rv.doctor.reviewer) names.push(esc(rv.doctor.reviewer));
+  if(rv.dietician && rv.dietician.reviewer) names.push(esc(rv.dietician.reviewer));
+  if(rv.yoga && rv.yoga.reviewer) names.push(esc(rv.yoga.reviewer));
+
+  var coupon='JK-'+String(rep.Lab||'XXX').split('-').pop()+'-'+String(rep.Ref||'').slice(-4);
+
+  $('sheet').innerHTML=
+  '<div class="noprint" style="text-align:center;margin:16px 0"><button onclick="window.print()">Print / Save PDF</button></div>'
+  +'<div class="psheet">'
+  +'<div class="hd"><h2>Aapki report — aasan bhasha mein</h2>'
+  +'<p>'+esc(rep.Lab||'')+' ki taraf se · nishulk · JeevanKey expert panel</p></div>'
+  +'<div class="box"><div>Ref : '+esc(rep.Ref||ref)+'</div><div>Age/Sex : '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')+'</div>'
+  +'<div>Profile : '+esc(rep.Profile||'')+'</div><div>Lab : '+esc(rep.Lab||'')+'</div>'
+  +'<div style="grid-column:1/-1">Name : '+esc(rep.Patient||'')+'</div></div>'
+  +flag+pr+se
+  +'<h3>Chinta ki baat nahi '+(normalGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(normal)+'</p>'
+  +qHtml
+  +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(dietTxt)+'</p>'
+  +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(yogaTxt)+'</p>'
+  +'<div class="coupon">Report par baat karni hai?<br>'
+  +'<span style="font-size:13px;color:#5d6b7a">Ek Doctor + ek Health Expert — dono aapke apne doctor ke saath kaam karenge</span>'
+  +'<div class="code">'+esc(coupon)+'</div><s>₹999</s> <b>₹499</b> · WhatsApp 97600 15878</div>'
+  +'<div class="foot">'+(names.length?'Review: '+names.join(' · ')+'<br>':'')
+  +'Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
+  +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hai.</div></div>';
+  $('sheet').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
