@@ -9,7 +9,7 @@
 :root{--ink:#101720;--paper:#fff;--field:#f4f6f8;--line:#d9dfe6;--muted:#5d6b7a;
 --navy:#0C447C;--amber:#B26A00;--red:#A31D1D;--ok:#1F6B4A}
 *{box-sizing:border-box}
-body{margin:0;background:#e9edf1;color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
+body{margin:0;background:#9ad8ef;color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:15px;line-height:1.5}
 .wrap{max-width:720px;margin:0 auto;padding:14px 14px 90px}
 .masthead{background:var(--navy);color:#fff;padding:13px 16px;border-radius:4px}
 .masthead h1{font-size:16px;margin:0;font-weight:600}
@@ -59,7 +59,7 @@ textarea{resize:vertical;min-height:60px}
 .hide{display:none}
 .gate{max-width:360px;margin:60px auto;text-align:center}
 .gate .card{padding:24px}
-.actions{position:sticky;bottom:0;background:#e9edf1;padding:12px 0 0;margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line)}
+.actions{position:sticky;bottom:0;background:#9ad8ef;padding:12px 0 0;margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line)}
 button{font-family:inherit;font-size:15px;font-weight:600;padding:12px 18px;border-radius:3px;border:1px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;flex:1;min-width:130px}
 button.ghost{background:#fff;color:var(--navy)}
 #err{color:var(--red);font-size:13px;font-weight:600;margin:8px 0 0;width:100%}
@@ -100,6 +100,7 @@ button.ghost{background:#fff;color:var(--navy)}
         <div><label>Age / Sex</label><input id="age" readonly></div>
         <div><label>Patient</label><input id="pname" readonly></div>
       </div>
+      <div class="row"><div><label>Profile</label><input class="mono" id="profileBox" readonly></div></div>
       <div class="draft" id="draftBox"></div>
     </div>
 
@@ -174,7 +175,7 @@ button.ghost{background:#fff;color:var(--navy)}
 
 <script>
 /* ======= CONFIG — paste your deployed Apps Script /exec URL ======= */
-var API_URL = 'https://script.google.com/macros/s/AKfycbzGFVSaS19vEEpreDL45BCPiTKyE8jxLHMvo5leQRr0zRR4aOB2FVWy87VC6aYUv6Y/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbwnsEyKfhTAKdIpQwQU2jn2tUEHCU_gH36zvJJCQj8GaL7eMqfAfp8OKKoNDQrCxJY/exec';
 /* ================================================================= */
 
 /* tell a parent iframe (Carrd) our real height, so it never cuts off or scrolls */
@@ -189,7 +190,12 @@ window.addEventListener('resize',jkReportHeight);
 new MutationObserver(jkReportHeight).observe(document.body,{subtree:true,childList:true,attributes:true});
 
 var P=new URLSearchParams(location.search);
-var ROLE=(P.get('role')||'doctor').toLowerCase();
+var ROLE=(function(){
+  var r=(P.get('role')||'doctor').toLowerCase();
+  if(r==='diet'||r==='dietician') return 'dietician';
+  if(r==='yog'||r==='yoga') return 'yoga';
+  return 'doctor';
+})();
 var REF=P.get('ref')||'';
 var RATES={doctor:75,dietician:45,yoga:30};
 var LABEL={doctor:'Doctor',dietician:'Dietician',yoga:'Yoga Therapist'};
@@ -253,6 +259,8 @@ function render(rep){
   $('v-'+(RATES[ROLE]?ROLE:'doctor')).classList.remove('hide');
   $('ref').value=rep.Ref||REF; $('lab').value=rep.Lab||'';
   $('age').value=(rep.Age||'')+' / '+(rep.Sex||''); $('pname').value=rep.Patient||'';
+  if($('profileBox')) $('profileBox').value=rep.Profile||'';
+  window.CURRENT_PROFILE=String(rep.Profile||'').trim();
 
   var flags=String(rep.Flagged||'').split('|').map(function(s){return s.trim()}).filter(Boolean);
   $('draftBox').innerHTML='<h4>From report — out of range</h4>'
@@ -263,6 +271,15 @@ function render(rep){
   if(ROLE==='doctor'||!RATES[ROLE]) setupDoctor(rep);
 }
 
+/* which optional panels each profile contains */
+var PROFILE_PANELS={
+  '1.1':['bsf','urine'], '1.1E':['esr','bsf','urine'],
+  '1.2':[], '1.2E':['esr'],
+  '1.3':['bsf','testo'], '1.3E':['esr','bsf','testo'],
+  '1.4':['crp'], '1.4E':['esr','crp'],
+  '1.5':['testo','psa'], '1.5E':['esr','testo','psa']
+};
+
 function setupDoctor(rep){
   var PANELS={bsf:'Sugar Fasting',urine:'Urine Routine',esr:'ESR',testo:'Testosterone',psa:'PSA',crp:'CRP / RF'};
   $('panels').innerHTML=Object.keys(PANELS).map(function(k){
@@ -271,6 +288,8 @@ function setupDoctor(rep){
       +'<option value="extra">Extra sample received</option>'
       +'<option value="notsent">Sample not sent</option><option value="unfit">Sample not usable</option></select></div>';
   }).join('');
+  var inProfile=PROFILE_PANELS[window.CURRENT_PROFILE]||[];
+  Object.keys(PANELS).forEach(function(k){$('s-'+k).value=inProfile.indexOf(k)>=0?'done':'no'});
   var SYS=['Sugar','Liver','Kidney','Thyroid','Cholesterol','Blood count'];
   $('normalChips').innerHTML=SYS.map(function(s){return '<label><input type="checkbox" class="nc" value="'+s+'"><span>'+s+'</span></label>'}).join('');
   document.querySelectorAll('input[name=tri]').forEach(function(r){r.addEventListener('change',function(){$('winbox').classList.toggle('hide',!$('t-priority').checked)})});
@@ -321,11 +340,11 @@ function validate(){
 }
 function collect(){
   var role=RATES[ROLE]?ROLE:'doctor';
-  var out={ref:REF,role:role,pass:PASS,payout:0};
-  if(role==='dietician'){out.reviewer=$('die_name').value;out.minutes=$('die_min').value;out.payout=(+$('die_min').value||0)*45;out.data={diet:$('diet').value}}
-  else if(role==='yoga'){out.reviewer=$('yog_name').value;out.minutes=$('yog_min').value;out.payout=(+$('yog_min').value||0)*30;out.data={yoga:$('yoga').value}}
+  var out={ref:REF,role:role,pass:PASS,payout:RATES[role]};
+  if(role==='dietician'){out.reviewer=$('die_name').value;out.minutes=$('die_min').value;out.data={diet:$('diet').value}}
+  else if(role==='yoga'){out.reviewer=$('yog_name').value;out.minutes=$('yog_min').value;out.data={yoga:$('yoga').value}}
   else{
-    out.reviewer=$('doc_name').value;out.minutes=$('doc_min').value;out.payout=(+$('doc_min').value||0)*75;
+    out.reviewer=$('doc_name').value;out.minutes=$('doc_min').value;
     out.data={
       triage:$('t-priority').checked?'priority':'routine',window:$('window').value,
       primary:[[$('p1v').value,$('p1m').value],[$('p2v').value,$('p2m').value]].filter(function(x){return x[0].trim()}),
