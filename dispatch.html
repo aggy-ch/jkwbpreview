@@ -29,23 +29,36 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .n{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
 .mkbtn{padding:6px 12px;font-size:13px}
 
-/* printable sheet */
+/* printable sheet — matches the A4 report paper.
+   Top ~34% (up to ~290pt of 842) is left BLANK: on the physical report stock
+   that zone holds the QR, barcode, and patient detail box. This page prints
+   as a separate A4 sheet appended to the report, same stock, same identity. */
 #sheet{margin-top:16px}
-.psheet{background:#fff;border:1px solid var(--line);padding:26px;font-size:14px;max-width:600px;margin:0 auto}
-.psheet .hd{border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:14px}
-.psheet .hd h2{margin:0;font-size:18px}
-.psheet .hd p{margin:3px 0 0;font-size:12px;color:var(--muted)}
-.psheet .box{border:1px solid var(--ink);padding:9px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px;display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;margin-bottom:16px}
-.psheet h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 7px;border-bottom:1px solid var(--line);padding-bottom:4px}
-.psheet ul{margin:0;padding-left:18px}.psheet li{margin-bottom:6px}
-.psheet .val{font-family:'IBM Plex Mono',monospace;font-weight:600}
-.flag{border-left:4px solid var(--amber);background:#fff8e8;padding:11px 13px;margin:14px 0;font-weight:600}
-.psheet .coupon{border:2px dashed var(--ink);padding:14px;text-align:center;margin-top:20px}
-.psheet .coupon .code{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;letter-spacing:.06em;margin:6px 0}
-.psheet .foot{font-size:11px;color:var(--muted);margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
-.gen{font-size:10px;color:#9aa6b2;font-style:italic}
+.psheet{background:#fff;color:#000;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.45;
+  width:210mm;min-height:297mm;margin:0 auto;padding:0;position:relative}
+.psheet .reserved{height:96mm}         /* blank zone = report header area */
+.psheet .body{padding:0 14mm}
+.psheet .title{text-align:center;font-weight:700;font-size:12px;text-decoration:underline;
+  letter-spacing:.02em;margin:0 0 10px}
+.psheet .box{border:1px solid #000;padding:7px 10px;font-size:10.5px;
+  display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;margin-bottom:14px}
+.psheet h3{font-size:11px;font-weight:700;margin:14px 0 5px;border-bottom:1px solid #000;padding-bottom:3px}
+.psheet ul{margin:0;padding-left:16px}.psheet li{margin-bottom:4px}
+.psheet .val{font-weight:700}
+.flag{border:1px solid #000;padding:8px 11px;margin:12px 0;font-weight:700;font-size:11px}
+.psheet .coupon{border:1.5px dashed #000;padding:12px;text-align:center;margin-top:18px}
+.psheet .coupon .code{font-family:'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:.05em;margin:5px 0}
+.psheet .web{font-weight:700;margin-top:4px}
+.psheet .revline{margin-top:18px;padding-top:8px;border-top:1px solid #000;font-size:10px}
+.psheet .disc{font-size:9px;color:#333;margin-top:6px}
+.gen{font-size:9px;color:#888;font-style:italic;font-weight:400}
 
-@media print{body{background:#fff}.noprint{display:none!important}.psheet{border:none;padding:0;max-width:none}.wrap{padding:0;max-width:none}}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}.noprint{display:none!important}
+  .wrap{padding:0;max-width:none}
+  .psheet{width:210mm;min-height:297mm;margin:0}
+}
 </style>
 </head>
 <body>
@@ -83,9 +96,10 @@ var $=function(id){return document.getElementById(id)};
 var esc=function(s){return String(s||'').replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})};
 var PASS='';
 
-/* generic fallbacks when a role hasn't reviewed — NO name attached */
+/* generic fallbacks when a role hasn't reviewed — NO name attached.
+   Note: there is deliberately NO generic "chinta ki baat nahi" — that line
+   only appears when a doctor actually reviewed. */
 var GENERIC={
-  normal:'Baaki values normal range mein hain. Detail ke liye apne doctor se baat karein.',
   questions:['Yeh values kis wajah se aisi hain?','Kya aur koi jaanch zaroori hai?','Agli baar poori jaanch kab karwani chahiye?'],
   diet:'Santulit khana khayein — sabziyan, dal, saabut anaj. Zyada tala-bhuna aur meetha kam karein. Paani theek matra mein piyein.',
   yoga:'Roz thodi walking ya halki stretching karein. Neend poori lein. Koi bhi bhaari abhyas shuru karne se pehle apne doctor se poochh lein.'
@@ -142,44 +156,51 @@ function renderSheet(rep, rv){
   var se = doc && doc.secondary && doc.secondary.length
     ? '<h3>Dhyan rakhne wali</h3><ul>'+doc.secondary.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>' : '';
 
-  var normal = doc && doc.normal ? doc.normal : GENERIC.normal;
-  var normalGen = !(doc && doc.normal);
+  /* "chinta ki baat nahi" ONLY when a doctor actually reviewed. No generic version. */
+  var normalBlock = (doc && doc.normal)
+    ? '<h3>Chinta ki baat nahi</h3><p>'+esc(doc.normal)+'</p>' : '';
 
+  /* questions: doctor's if present, else general */
   var qs = (doc && doc.questions && doc.questions.length) ? doc.questions : GENERIC.questions;
   var qGen = !(doc && doc.questions && doc.questions.length);
-  var qHtml='<h3>Apne doctor se poochhein '+(qGen?'<span class="gen">(general)</span>':'')+'</h3><ul>'+qs.map(function(q){return '<li>'+esc(q)+'</li>'}).join('')+'</ul>';
+  var qHtml='<h3>Apne doctor se poochhein '+(qGen?'<span class="gen">(general)</span>':'')+'</h3><ul>'
+    +qs.map(function(q){return '<li>'+esc(q)+'</li>'}).join('')+'</ul>';
 
   var dietTxt = die && die.diet ? die.diet : GENERIC.diet;
   var dietGen = !(die && die.diet);
   var yogaTxt = yog && yog.yoga ? yog.yoga : GENERIC.yoga;
   var yogaGen = !(yog && yog.yoga);
 
+  /* reviewer names, matching Immuno report footer style: "Name" on its own line */
   var names=[];
   if(rv.doctor && rv.doctor.reviewer) names.push(esc(rv.doctor.reviewer));
   if(rv.dietician && rv.dietician.reviewer) names.push(esc(rv.dietician.reviewer));
   if(rv.yoga && rv.yoga.reviewer) names.push(esc(rv.yoga.reviewer));
 
-  var coupon='JK-'+String(rep.Lab||'XXX').split('-').pop()+'-'+String(rep.Ref||'').slice(-4);
+  var labFull = rep.Lab || '';   /* full "Sample From" name, e.g. S.B PATHOLOGY LAB */
+  var coupon = rep.Coupon || ('JK-'+String(rep.Ref||'').slice(-4));
 
   $('sheet').innerHTML=
-  '<div class="noprint" style="text-align:center;margin:16px 0"><button onclick="window.print()">Print / Save PDF</button></div>'
-  +'<div class="psheet">'
-  +'<div class="hd"><h2>Aapki report — aasan bhasha mein</h2>'
-  +'<p>'+esc(rep.Lab||'')+' ki taraf se · nishulk · JeevanKey expert panel</p></div>'
-  +'<div class="box"><div>Ref : '+esc(rep.Ref||ref)+'</div><div>Age/Sex : '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')+'</div>'
-  +'<div>Profile : '+esc(rep.Profile||'')+'</div><div>Lab : '+esc(rep.Lab||'')+'</div>'
-  +'<div style="grid-column:1/-1">Name : '+esc(rep.Patient||'')+'</div></div>'
-  +flag+pr+se
-  +'<h3>Chinta ki baat nahi '+(normalGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(normal)+'</p>'
-  +qHtml
-  +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(dietTxt)+'</p>'
-  +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(yogaTxt)+'</p>'
-  +'<div class="coupon">Report par baat karni hai?<br>'
-  +'<span style="font-size:13px;color:#5d6b7a">Ek Doctor + ek Health Expert — dono aapke apne doctor ke saath kaam karenge</span>'
-  +'<div class="code">'+esc(coupon)+'</div><s>₹999</s> <b>₹499</b> · WhatsApp 97600 15878</div>'
-  +'<div class="foot">'+(names.length?'Review: '+names.join(' · ')+'<br>':'')
-  +'Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
-  +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hai.</div></div>';
+   '<div class="noprint" style="text-align:center;margin:16px 0"><button onclick="window.print()">Print / Save PDF</button>'
+   +'<span style="margin-left:12px;color:var(--muted);font-size:13px">Prints as a separate A4 page on report stock.</span></div>'
+   +'<div class="psheet"><div class="reserved"></div><div class="body">'
+   +'<div class="title">JEEVANKEY REPORT REVIEW</div>'
+   +'<div class="box">'
+   +'<div>Ref No. : '+esc(rep.Ref||'')+'</div><div>Age/Sex : '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')+'</div>'
+   +'<div>Profile : '+esc(rep.Profile||'')+'</div><div>Lab : '+esc(labFull)+'</div>'
+   +'<div style="grid-column:1/-1">Name : '+esc(rep.Patient||'')+'</div></div>'
+   +flag+pr+se+normalBlock+qHtml
+   +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(dietTxt)+'</p>'
+   +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(yogaTxt)+'</p>'
+   +'<div class="coupon">Report par baat karni hai?<br>'
+   +'<span style="font-size:10px">Ek Doctor + ek Health Expert — dono aapke apne doctor ke saath kaam karenge</span>'
+   +'<div class="code">'+esc(coupon)+'</div>'
+   +'<div>Doctor + Health Expert · ₹499</div>'
+   +'<div class="web">jeevankey.com · WhatsApp 97600 15878</div></div>'
+   +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
+   +'<div class="disc">Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
+   +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hai.</div>'
+   +'</div></div>';
   $('sheet').scrollIntoView({behavior:'smooth'});
 }
 </script>
