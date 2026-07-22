@@ -46,9 +46,15 @@ textarea{resize:vertical;min-height:60px}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chips label{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--field);border-radius:20px;padding:7px 13px;font-size:13px;font-weight:500;cursor:pointer;margin:0}
 .chips input{width:auto;margin:0}.chips label:has(input:checked){background:#eaf1f8;border-color:var(--navy);color:var(--navy)}
-.qlist label.q{display:flex;gap:9px;align-items:flex-start;font-size:14px;font-weight:400;padding:6px 0;cursor:pointer}
-.qlist input[type=checkbox]{width:auto;margin:3px 0 0;flex:none}
-.qgroup{margin-bottom:8px}.qgroup b{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-family:'IBM Plex Mono',monospace}
+#qlist label.q{display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:400;color:var(--ink);padding:7px 0;cursor:pointer;line-height:1.4}
+#qlist label.q input[type=checkbox]{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--navy)}
+#qlist label.q span{flex:1}
+.qgroup{margin-bottom:14px}
+.qgroup>b{display:block;font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;font-family:'IBM Plex Mono',monospace;margin-bottom:2px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.customq{display:flex;gap:8px;margin-bottom:8px}
+.customq input{flex:1}
+.customq button{flex:none;min-width:0;width:40px;padding:0;font-size:20px;line-height:1}
+.addq{background:#fff;color:var(--navy);border:1px dashed var(--navy);font-size:13px;padding:8px 12px;width:auto;flex:none}
 .note{background:#fff8e8;border-left:3px solid var(--amber);padding:10px 12px;font-size:13px;margin-bottom:12px}
 .hide{display:none}
 .gate{max-width:360px;margin:60px auto;text-align:center}
@@ -127,7 +133,11 @@ button.ghost{background:#fff;color:var(--navy)}
       <div class="card"><p class="sec"><span>Questions for the patient's own doctor</span></p>
         <p class="hint">Updates based on what you flagged. Tick the ones that fit.</p>
         <div id="qlist"></div>
-        <div style="margin-top:8px"><input id="qx" placeholder="Add your own (Hinglish, optional)"></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+          <label>Add your own questions (Hinglish)</label>
+          <div id="customQs"></div>
+          <button type="button" class="addq" onclick="addCustomQ()">+ Add question</button>
+        </div>
       </div>
       <div class="card"><p class="sec"><span>You</span></p>
         <div class="row r2"><div><label>Name</label><input id="doc_name"></div><div><label>Minutes</label><input class="mono" id="doc_min" type="number" min="0"></div></div>
@@ -167,6 +177,17 @@ button.ghost{background:#fff;color:var(--navy)}
 var API_URL = 'https://script.google.com/macros/s/AKfycbzGFVSaS19vEEpreDL45BCPiTKyE8jxLHMvo5leQRr0zRR4aOB2FVWy87VC6aYUv6Y/exec';
 /* ================================================================= */
 
+/* tell a parent iframe (Carrd) our real height, so it never cuts off or scrolls */
+function jkReportHeight(){
+  try{
+    var h=document.body.scrollHeight;
+    if(window.parent!==window) window.parent.postMessage({jkHeight:h},'*');
+  }catch(e){}
+}
+window.addEventListener('load',jkReportHeight);
+window.addEventListener('resize',jkReportHeight);
+new MutationObserver(jkReportHeight).observe(document.body,{subtree:true,childList:true,attributes:true});
+
 var P=new URLSearchParams(location.search);
 var ROLE=(P.get('role')||'doctor').toLowerCase();
 var REF=P.get('ref')||'';
@@ -176,14 +197,18 @@ var $=function(id){return document.getElementById(id)};
 var esc=function(s){return String(s||'').replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})};
 var PASS='';
 
+/* Default question bank. Overridden at load time by the Sheet's
+   Questions tab if present, so doctors edit questions without touching code. */
 var QMAP={
-  anaemia:{label:'Anaemia / Hb',qs:["Khoon ki kami ka kaaran kya hai — khana, absorption, ya kuch aur?","Kis tarah ka khana badhaun?","Kitne din baad Hb dobara check karun?"]},
-  wbc:{label:'Low white cells',qs:["White cells kam kyun hain?","Kya jaanch zaroori hai?"]},
-  deficiency:{label:'Vitamin D / B12',qs:["Yeh kami kis wajah se hui?","Khane se theek ho sakti hai?","Kitne mahine mein dobara check?"]},
-  thyroid:{label:'Thyroid',qs:["Kya thakan/wajan isi se juda hai?","Agli jaanch kab?"]},
-  sugar:{label:'Sugar / HbA1c',qs:["Dawai se pehle diet se kitna farak?","Rozana kis cheez par nazar rakhun?"]},
-  lipid:{label:'Cholesterol',qs:["Dawai zaroori hai ya pehle lifestyle?","Kitne din baad dobara dekhein?"]},
-  general:{label:'General',qs:["Yeh values kis wajah se aisi hain?","Kya koi purani dawai iska kaaran ho sakti hai?","Kya aur koi jaanch zaroori hai?"]}
+  anaemia:{label:'Anaemia / Hb',qs:["Khoon ki kami ka kaaran kya hai — khana, absorption, ya kuch aur?","Kis tarah ka khana badhaun?","Kitne din baad Hb dobara check karun?","Kya iske liye koi aur jaanch honi chahiye?"]},
+  wbc:{label:'White cells',qs:["White cells kam/zyada kyun hain?","Kya yeh apne aap theek hota hai ya jaanch zaroori hai?","Kitne din baad dobara dekhein?"]},
+  deficiency:{label:'Vitamin D / B12',qs:["Yeh kami kis wajah se hui?","Khane se theek ho sakti hai ya nahi?","Kitne mahine mein dobara check karun?","Kya rozana dhoop/khane mein kuch badalna chahiye?"]},
+  thyroid:{label:'Thyroid',qs:["Kya thakan ya wajan isi se juda hai?","Agli jaanch kab karwaun?","Kya khane mein kuch dhyan rakhna hai?"]},
+  sugar:{label:'Sugar / HbA1c',qs:["Dawai se pehle diet se kitna farak pad sakta hai?","Rozana kis cheez par nazar rakhun?","Kitne din baad dobara jaanch?"]},
+  lipid:{label:'Cholesterol',qs:["Dawai zaroori hai ya pehle lifestyle try karein?","Kitne din baad dobara dekhein?","Khane mein kya badlun?"]},
+  liver:{label:'Liver',qs:["Yeh values kis wajah se aisi hain?","Kya meri koi dawai iska kaaran ho sakti hai?","Kitne din baad dobara jaanch?"]},
+  kidney:{label:'Kidney',qs:["Yeh values kis wajah se aisi hain?","Kya paani/khane mein kuch badalna chahiye?","Kab dobara check?"]},
+  general:{label:'General',qs:["Yeh values kis wajah se aisi hain?","Kya meri koi purani dawai iska kaaran ho sakti hai?","Kya aur koi jaanch zaroori hai?","Agli baar poori jaanch kab karwani chahiye?"]}
 };
 
 function unlock(){
@@ -198,6 +223,15 @@ function loadReport(){
   $('whoName').textContent=LABEL[ROLE]||'Doctor';
   $('whoRef').textContent=REF;
   $('whoRate').textContent='₹'+(RATES[ROLE]||75);
+  /* pull the question bank from the Sheet if the doctor role; ignore failure */
+  if(ROLE==='doctor'||!RATES[ROLE]){
+    fetch(API_URL+'?action=getQuestions&pass='+encodeURIComponent(PASS))
+      .then(function(r){return r.json()}).then(function(res){
+        if(res&&res.ok&&res.bank&&Object.keys(res.bank).length) QMAP=res.bank;
+      }).catch(function(){}).finally(fetchReport);
+  } else fetchReport();
+}
+function fetchReport(){
   fetch(API_URL+'?action=getReport&ref='+encodeURIComponent(REF)+'&pass='+encodeURIComponent(PASS))
     .then(function(r){return r.json()})
     .then(function(res){
@@ -205,6 +239,13 @@ function loadReport(){
       render(res.report);
     })
     .catch(function(e){$('loading').textContent='Network error. Check the link and try again.'});
+}
+var customCount=0;
+function addCustomQ(){
+  customCount++;
+  var d=document.createElement('div');d.className='customq';
+  d.innerHTML='<input class="cq" placeholder="Apna sawal likhein"><button type="button" onclick="this.parentNode.remove()">×</button>';
+  $('customQs').appendChild(d);
 }
 
 function render(rep){
@@ -290,7 +331,8 @@ function collect(){
       primary:[[$('p1v').value,$('p1m').value],[$('p2v').value,$('p2m').value]].filter(function(x){return x[0].trim()}),
       secondary:[$('s1').value,$('s2').value,$('s3').value].filter(function(v){return v.trim()}),
       normal:normalSentence(),
-      questions:[].slice.call(document.querySelectorAll('.qc:checked')).map(function(c){return c.value}).concat($('qx').value.trim()?[$('qx').value.trim()]:[]),
+      questions:[].slice.call(document.querySelectorAll('.qc:checked')).map(function(c){return c.value})
+        .concat([].slice.call(document.querySelectorAll('.cq')).map(function(c){return c.value.trim()}).filter(Boolean)),
       samples:(function(){var s={};document.querySelectorAll('[id^=s-]').forEach(function(x){s[x.id.slice(2)]=x.value});return s})()
     };
   }
