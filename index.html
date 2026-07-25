@@ -65,6 +65,14 @@ button.ghost{background:#fff;color:var(--navy)}
 #err{color:var(--red);font-size:13px;font-weight:600;margin:8px 0 0;width:100%}
 .done{background:#eaf5ef;border:1px solid var(--ok);color:var(--ok);padding:16px;border-radius:4px;margin-top:14px;font-weight:600;text-align:center}
 .load{text-align:center;color:var(--muted);padding:40px}
+.qrow{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:4px;margin-bottom:8px;cursor:pointer;background:#fff}
+.qrow:hover{border-color:var(--navy);background:#f4f8fc}
+.qrow .qref{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px}
+.qrow .qmeta{grid-column:1;font-size:12px;color:var(--muted)}
+.qrow .qstat{grid-row:1/3;align-self:center;font-size:13px;font-weight:600;color:var(--navy)}
+.qrow.qdone{opacity:.5;cursor:default;background:#f4f6f8}
+.qrow.qdone:hover{border-color:var(--line);background:#f4f6f8}
+.qrow.qdone .qstat{color:var(--ok)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -85,19 +93,37 @@ button.ghost{background:#fff;color:var(--navy)}
 <!-- ===== app ===== -->
 <div id="app" class="hide">
   <div class="masthead"><h1>Whole Body Profile — Review</h1><p>Immuno Diagnostics · JeevanKey expert panel</p></div>
-  <div class="who"><span>Reviewer: <b id="whoName">—</b></span><span>Ref <b id="whoRef">—</b></span><span>Per review: <b id="whoRate">—</b></span></div>
+  <div class="who"><span>Reviewer: <b id="whoName">—</b></span><span id="whoRefWrap" class="hide">Ref <b id="whoRef">—</b></span><span>Per review: <b id="whoRate">—</b></span></div>
 
-  <div id="loading" class="load">Loading report…</div>
+  <!-- QUEUE -->
+  <div id="queueView">
+    <div id="qload" class="load">Loading today's list…</div>
+    <div id="qcard" class="card hide">
+      <p class="sec"><span>Today's reports</span><span id="qcount">—</span></p>
+      <p class="hint">Tap a reference number to review it. Completed ones drop off.</p>
+      <div id="queueList"></div>
+      <button type="button" class="ghost" style="margin-top:12px;width:100%" onclick="loadQueue()">Refresh list</button>
+    </div>
+  </div>
 
-  <form id="f" class="hide">
-    <div class="card">
-      <p class="sec"><span>Report</span></p>
-      <div class="row r2">
-        <div><label>Reference No.</label><input class="mono" id="ref" readonly></div>
-        <div><label>Lab</label><input class="mono" id="lab" readonly></div>
-      </div>
-      <div class="row r2">
-        <div><label>Age / Sex</label><input id="age" readonly></div>
+  <!-- REVIEW -->
+  <div id="reviewView" class="hide">
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <button type="button" class="ghost" style="flex:none;min-width:0;padding:8px 14px" onclick="backToQueue()">← List</button>
+      <a id="viewReport" href="#" target="_blank" rel="noopener" class="hide" style="flex:none;font-size:14px;font-weight:600;color:var(--navy);text-decoration:none;border:1px solid var(--navy);border-radius:3px;padding:8px 14px">View full WBP report ↗</a>
+    </div>
+
+    <div id="loading" class="load">Loading report…</div>
+
+    <form id="f" class="hide">
+      <div class="card">
+        <p class="sec"><span>Report</span></p>
+        <div class="row r2">
+          <div><label>Reference No.</label><input class="mono" id="ref" readonly></div>
+          <div><label>Lab</label><input class="mono" id="lab" readonly></div>
+        </div>
+        <div class="row r2">
+          <div><label>Age / Sex</label><input id="age" readonly></div>
         <div><label>Patient</label><input id="pname" readonly></div>
       </div>
       <div class="row"><div><label>Profile</label><input class="mono" id="profileBox" readonly></div></div>
@@ -170,12 +196,13 @@ button.ghost{background:#fff;color:var(--navy)}
   </form>
 
   <div id="out"></div>
+  </div><!-- /reviewView -->
 </div>
 </div>
 
 <script>
 /* ======= CONFIG — paste your deployed Apps Script /exec URL ======= */
-var API_URL = 'https://script.google.com/macros/s/AKfycbwnsEyKfhTAKdIpQwQU2jn2tUEHCU_gH36zvJJCQj8GaL7eMqfAfp8OKKoNDQrCxJY/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbww8TpHjW29tPcG1nLZQKKpuykFVgdIP9Oe1_MYCQND5Hu6WhtVwAIJRjLpd1xN7SM/exec';
 /* ================================================================= */
 
 /* tell a parent iframe (Carrd) our real height, so it never cuts off or scrolls */
@@ -196,7 +223,7 @@ var ROLE=(function(){
   if(r==='yog'||r==='yoga') return 'yoga';
   return 'doctor';
 })();
-var REF=P.get('ref')||'';
+var REF='';   /* set when a ref is tapped from the queue */
 var RATES={doctor:75,dietician:45,yoga:30};
 var LABEL={doctor:'Doctor',dietician:'Dietician',yoga:'Yoga Therapist'};
 var $=function(id){return document.getElementById(id)};
@@ -220,23 +247,52 @@ var QMAP={
 function unlock(){
   PASS=$('pass').value.trim();
   if(!PASS){$('gateErr').textContent='Enter passcode.';return}
-  if(!REF){$('gateErr').textContent='No report ref in link.';return}
   $('gate').classList.add('hide');$('app').classList.remove('hide');
-  loadReport();
-}
-
-function loadReport(){
   $('whoName').textContent=LABEL[ROLE]||'Doctor';
-  $('whoRef').textContent=REF;
   $('whoRate').textContent='₹'+(RATES[ROLE]||75);
-  /* pull the question bank from the Sheet if the doctor role; ignore failure */
+  /* preload question bank once for doctors */
   if(ROLE==='doctor'||!RATES[ROLE]){
     fetch(API_URL+'?action=getQuestions&pass='+encodeURIComponent(PASS))
       .then(function(r){return r.json()}).then(function(res){
         if(res&&res.ok&&res.bank&&Object.keys(res.bank).length) QMAP=res.bank;
-      }).catch(function(){}).finally(fetchReport);
-  } else fetchReport();
+      }).catch(function(){});
+  }
+  loadQueue();
 }
+
+function loadQueue(){
+  $('reviewView').classList.add('hide');
+  $('queueView').classList.remove('hide');
+  $('whoRefWrap').classList.add('hide');
+  $('qcard').classList.add('hide');$('qload').classList.remove('hide');$('qload').textContent="Loading today's list…";
+  fetch(API_URL+'?action=getQueue&role='+encodeURIComponent(ROLE)+'&pass='+encodeURIComponent(PASS))
+    .then(function(r){return r.json()}).then(function(res){
+      if(!res.ok){$('qload').textContent='Error: '+(res.error||'could not load');return}
+      $('qload').classList.add('hide');$('qcard').classList.remove('hide');
+      var q=res.queue||[];
+      var pending=q.filter(function(x){return !x.done});
+      $('qcount').textContent=pending.length+' pending';
+      if(!q.length){$('queueList').innerHTML='<p class="hint">Aaj ke liye koi report nahi hai abhi tak.</p>';return}
+      $('queueList').innerHTML=q.map(function(x){
+        return '<div class="qrow'+(x.done?' qdone':'')+'"'+(x.done?'':' onclick="openRef(\''+esc(x.ref)+'\')"')+'>'
+          +'<div class="qref">'+esc(x.ref)+'</div>'
+          +'<div class="qmeta">'+esc(x.lab)+' · '+esc(x.age)+' '+esc(x.sex)+' · '+esc(x.profile)+'</div>'
+          +'<div class="qstat">'+(x.done?'✓ done':'review →')+'</div></div>';
+      }).join('');
+    }).catch(function(){$('qload').textContent='Network error.'});
+}
+
+function openRef(ref){
+  REF=ref;
+  $('queueView').classList.add('hide');
+  $('reviewView').classList.remove('hide');
+  $('whoRefWrap').classList.remove('hide');$('whoRef').textContent=ref;
+  $('f').classList.add('hide');$('out').innerHTML='';
+  $('loading').classList.remove('hide');$('loading').textContent='Loading report…';
+  fetchReport();
+}
+function backToQueue(){ loadQueue(); }
+
 function fetchReport(){
   fetch(API_URL+'?action=getReport&ref='+encodeURIComponent(REF)+'&pass='+encodeURIComponent(PASS))
     .then(function(r){return r.json()})
@@ -261,6 +317,10 @@ function render(rep){
   $('age').value=(rep.Age||'')+' / '+(rep.Sex||''); $('pname').value=rep.Patient||'';
   if($('profileBox')) $('profileBox').value=rep.Profile||'';
   window.CURRENT_PROFILE=String(rep.Profile||'').trim();
+  /* full WBP report link, if provided in the Report column */
+  var rlink=rep.Report||rep.ReportLink||'';
+  if(rlink){$('viewReport').href=rlink;$('viewReport').classList.remove('hide');}
+  else{$('viewReport').classList.add('hide');}
 
   var flags=String(rep.Flagged||'').split('|').map(function(s){return s.trim()}).filter(Boolean);
   $('draftBox').innerHTML='<h4>From report — out of range</h4>'
@@ -365,9 +425,10 @@ function submitReview(){
     .then(function(r){return r.json()})
     .then(function(res){
       if(!res.ok){$('err').textContent='Save failed: '+(res.error||'error');return}
-      $('f').classList.add('hide');
+      $('f').classList.add('hide');$('err').textContent='';
       $('out').innerHTML='<div class="done">Review submitted — Ref '+esc(REF)+
-        '<br><span style="font-weight:400;font-size:13px">₹'+body.payout+' for this review.</span></div>';
+        '<br><span style="font-weight:400;font-size:13px">₹'+body.payout+' for this review.</span>'+
+        '<div style="margin-top:12px"><button type="button" onclick="backToQueue()">← Back to list</button></div></div>';
     })
     .catch(function(){$('err').textContent='Network error. Try again.'});
 }
