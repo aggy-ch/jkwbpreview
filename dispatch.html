@@ -35,9 +35,9 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
    as a separate A4 sheet appended to the report, same stock, same identity. */
 #sheet{margin-top:16px}
 .psheet{background:#fff;color:#000;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.45;
-  width:210mm;min-height:297mm;margin:0 auto;padding:0;position:relative}
-.psheet .reserved{height:96mm}         /* blank zone = report header area */
-.psheet .body{padding:0 14mm}
+  width:210mm;margin:0 auto;padding:0;position:relative}
+.psheet .reserved{height:78mm}         /* aligns with "Sample Collection Date/Time" row */
+.psheet .body{padding:0 14mm 10mm}
 .psheet .title{text-align:center;font-weight:700;font-size:12px;text-decoration:underline;
   letter-spacing:.02em;margin:0 0 10px}
 .psheet .box{border:1px solid #000;padding:7px 10px;font-size:10.5px;
@@ -46,18 +46,46 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .psheet ul{margin:0;padding-left:16px}.psheet li{margin-bottom:4px}
 .psheet .val{font-weight:700}
 .flag{border:1px solid #000;padding:8px 11px;margin:12px 0;font-weight:700;font-size:11px}
-.psheet .coupon{border:1.5px dashed #000;padding:12px;text-align:center;margin-top:18px}
-.psheet .coupon .code{font-family:'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:.05em;margin:5px 0}
-.psheet .web{font-weight:700;margin-top:4px}
+.psheet .offer{border:1.5px solid #000;padding:11px 13px;margin-top:16px}
+.psheet .offer-hd{font-weight:700;font-size:12px;text-align:center;margin-bottom:5px}
+.psheet .offer-why{font-size:10px;line-height:1.5;text-align:center;margin-bottom:9px}
+.psheet .oc-t{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.psheet .oc-p{font-size:16px;font-weight:700;line-height:1.2}
+.psheet .oc-p s{font-weight:400;font-size:12px;color:#555}
+.psheet .oc-d{font-size:9px;line-height:1.35;margin-top:3px}
+.psheet .code{font-family:'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:.05em;text-align:center;margin:9px 0 2px}
+.psheet .web{font-weight:700;text-align:center;font-size:11px}
+
+/* ---- back page ---- */
+.psheet.page2{page-break-before:always;margin-top:26px}
+.psheet.page2 .body{padding:20mm 14mm 12mm}
+.psheet .p2{font-size:10.5px;line-height:1.55;margin:0 0 4px}
+.psheet .small{font-size:9.5px;color:#333}
+.psheet .t2{width:100%;border-collapse:collapse;margin:4px 0 10px;font-size:10px}
+.psheet .t2 td{border-bottom:1px solid #ccc;padding:5px 4px;vertical-align:top;line-height:1.45}
+.psheet .t2 td.k{font-weight:700;width:32%;white-space:nowrap}
+.psheet .plans{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #000;margin:10px 0 6px}
+.psheet .pl{padding:8px 6px;text-align:center;border-right:1px solid #000}
+.psheet .pl:last-child{border-right:none}
+.psheet .pl-n{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em}
+.psheet .pl-p{font-size:15px;font-weight:700;line-height:1.15}
+.psheet .pl-d{font-size:8.5px}
+.psheet .cta2{border:1.5px solid #000;padding:11px;text-align:center;margin-top:14px}
+.psheet .cta2-t{font-weight:700;font-size:12px}
 .psheet .revline{margin-top:18px;padding-top:8px;border-top:1px solid #000;font-size:10px}
 .psheet .disc{font-size:9px;color:#333;margin-top:6px}
 .gen{font-size:9px;color:#888;font-style:italic;font-weight:400}
 
 @media print{
   @page{size:A4;margin:0}
-  body{background:#fff}.noprint{display:none!important}
-  .wrap{padding:0;max-width:none}
-  .psheet{width:210mm;min-height:297mm;margin:0}
+  html,body{background:#fff;height:auto;margin:0;padding:0}
+  .noprint{display:none!important}
+  .wrap{padding:0;margin:0;max-width:none}
+  #sheet{margin:0}
+  .psheet{width:210mm;min-height:auto;height:auto;margin:0;page-break-inside:avoid}
+  .psheet.page2{page-break-before:always;margin-top:0}
+  .psheet:last-child{page-break-after:avoid}
+  .psheet .body>*:last-child{margin-bottom:0}
 }
 </style>
 </head>
@@ -91,7 +119,7 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 </div>
 
 <script>
-var API_URL='https://script.google.com/macros/s/AKfycbwnsEyKfhTAKdIpQwQU2jn2tUEHCU_gH36zvJJCQj8GaL7eMqfAfp8OKKoNDQrCxJY/exec';
+var API_URL='PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';
 var $=function(id){return document.getElementById(id)};
 var esc=function(s){return String(s||'').replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})};
 var PASS='';
@@ -192,14 +220,66 @@ function renderSheet(rep, rv){
    +flag+pr+se+normalBlock+qHtml
    +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(dietTxt)+'</p>'
    +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(yogaTxt)+'</p>'
-   +'<div class="coupon">Report par baat karni hai?<br>'
-   +'<span style="font-size:10px">Ek Doctor + ek Health Expert — dono aapke apne doctor ke saath kaam karenge</span>'
+   /* ---------- FRONT PAGE: review + light marketing ---------- */
+   +'<div class="offer">'
+   +'<div class="offer-hd">Report toh mil gayi. Ab aage kya?</div>'
+   +'<div class="offer-why">'
+   +'Google par har value ka matlab alag milta hai — aur darr zyada. '
+   +'JeevanKey mein ek doctor aur ek health expert dono milkar aapki poori report dekhte hain, '
+   +'aur aapke apne doctor ke saath kaam karte hain — unke khilaaf nahi.'
+   +'</div>'
+   +'<div class="oc-t" style="text-align:center">Ek baar poori baat karni hai</div>'
+   +'<div class="oc-p" style="text-align:center"><s>₹999</s> <b>₹499</b></div>'
+   +'<div class="oc-d" style="text-align:center">Doctor + Health Expert · ek consultation</div>'
    +'<div class="code">'+esc(coupon)+'</div>'
-   +'<div>Doctor + Health Expert · ₹499</div>'
-   +'<div class="web">jeevankey.com · WhatsApp 97600 15878</div></div>'
+   +'<div class="web">WhatsApp 97600 15878 &nbsp;·&nbsp; jeevankey.com</div>'
+   +'<div class="oc-d" style="text-align:center;margin-top:3px">Yeh code batayein — 30 din tak maanya. '
+   +'Peeche wale panne par poori jaankari.</div>'
+   +'</div>'
    +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
    +'<div class="disc">Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
    +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hai.</div>'
+   +'</div></div>'
+
+   /* ---------- BACK PAGE: promotion + hiring ---------- */
+   +'<div class="psheet page2"><div class="body">'
+   +'<div class="title">JEEVANKEY — AAGE KYA?</div>'
+
+   +'<h3>Ek report se pata chalta hai. Badalta nahi.</h3>'
+   +'<p class="p2">Values ek din mein nahi bantin, aur ek din mein sudhartin bhi nahi. '
+   +'Jo cheezein sach mein farak laati hain — khana, neend, chalna-phirna, aur dawai ka sahi asar — '
+   +'unme <b>2 se 3 mahine</b> lagte hain. Us poore samay koi aapke saath ho, yahi JeevanKey ka kaam hai.</p>'
+
+   +'<h3>Kya milta hai monthly plan mein</h3>'
+   +'<table class="t2">'
+   +'<tr><td class="k">Poori team</td><td>Ek doctor, ek dietician, aur zarurat ke hisaab se yoga ya wellness expert — sab ek hi WhatsApp par</td></tr>'
+   +'<tr><td class="k">Har hafte check</td><td>Kya chal raha hai, kya nahi — poocha jaata hai. Aap akele nahi chhode jaate.</td></tr>'
+   +'<tr><td class="k">Plan badalta hai</td><td>Jo kaam na kare, woh badla jaata hai. Ek hi plan mahino tak nahi chalta.</td></tr>'
+   +'<tr><td class="k">Agli report tak</td><td>Jab agli jaanch ho, tab tak aapke saath — aur uske baad bhi samjhaane ke liye.</td></tr>'
+   +'<tr><td class="k">Aapke doctor ke saath</td><td>Unki hi salah ko follow karne mein madad. Hum unki jagah nahi lete.</td></tr>'
+   +'</table>'
+
+   +'<div class="plans">'
+   +'<div class="pl"><div class="pl-n">Essential</div><div class="pl-p">₹2,499</div><div class="pl-d">/mahina</div></div>'
+   +'<div class="pl"><div class="pl-n">Premium</div><div class="pl-p">₹4,499</div><div class="pl-d">/mahina</div></div>'
+   +'<div class="pl"><div class="pl-n">Elite</div><div class="pl-p">₹7,499</div><div class="pl-d">/mahina · poora parivaar</div></div>'
+   +'</div>'
+   +'<p class="p2 small">Ghar mein kisi aur ki report bhi hai? Apne plan mein family member add kar sakte hain.</p>'
+
+   +'<h3>Aur ek baat — kaam ki</h3>'
+   +'<p class="p2"><b>JeevanKey Haridwar mein hai, aur Haridwar se hi hire karta hai.</b><br>'
+   +'Coordinator, field aur support roles ke liye hum <b>pehle apne members ke parivaar se</b> resume dekhte hain. '
+   +'Agar ghar mein koi kaam dhoondh raha hai, resume bhej dein — WhatsApp par.<br>'
+   +'<span class="small">Doctor aur expert panel sirf qualification par chuna jaata hai.</span></p>'
+
+   +'<div class="cta2">'
+   +'<div class="cta2-t">Shuru karna hai?</div>'
+   +'<div class="code">'+esc(coupon)+'</div>'
+   +'<div class="web">WhatsApp 97600 15878</div>'
+   +'<div class="oc-d">jeevankey.com &nbsp;·&nbsp; Haridwar, Uttarakhand</div>'
+   +'</div>'
+   +'<div class="disc">JeevanKey ek coordinated care service hai. Yeh kisi bhi lab ya pharmacy se juda hua nahi hai. '
+   +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hoti.</div>'
    +'</div></div>';
   $('sheet').scrollIntoView({behavior:'smooth'});
 }
