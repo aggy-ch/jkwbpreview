@@ -75,6 +75,16 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .psheet .pl-d{font-size:8.5px}
 .psheet .cta2{border:1.5px solid #000;padding:11px;text-align:center;margin-top:14px}
 .psheet .cta2-t{font-weight:700;font-size:12px}
+.psheet .withdoc{border-left:3px solid #000;padding:8px 11px;margin:10px 0;font-size:10.5px;line-height:1.55;background:#f7f7f7}
+.psheet .offer-grid2{display:grid;grid-template-columns:1fr 1fr;border:1px solid #000;margin:4px 0 10px}
+.psheet .og-col{padding:9px;text-align:center}
+.psheet .og-col:first-child{border-right:1px solid #000}
+.psheet .og-t{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em}
+.psheet .og-p{font-size:17px;font-weight:700;line-height:1.2;margin:2px 0}
+.psheet .og-p s{font-weight:400;font-size:12px;color:#555}
+.psheet .og-p .pm{font-size:10px;font-weight:400}
+.psheet .og-d{font-size:9px;line-height:1.35}
+.psheet .howto2{font-size:9.5px;line-height:1.5;margin:7px 0;padding:7px 9px;border:1px dotted #000;background:#fafafa;text-align:left}
 .psheet .revline{margin-top:18px;padding-top:8px;border-top:1px solid #000;font-size:10px}
 .psheet .disc{font-size:9px;color:#333;margin-top:6px}
 .gen{font-size:9px;color:#888;font-style:italic;font-weight:400}
@@ -203,10 +213,11 @@ function renderSheet(rep, rv){
   var yogaGen = !(yog && yog.yoga);
 
   /* reviewer names, matching Immuno report footer style: "Name" on its own line */
+  /* reviewer names WITH role, matching Immuno report footer style */
   var names=[];
-  if(rv.doctor && rv.doctor.reviewer) names.push(esc(rv.doctor.reviewer));
-  if(rv.dietician && rv.dietician.reviewer) names.push(esc(rv.dietician.reviewer));
-  if(rv.yoga && rv.yoga.reviewer) names.push(esc(rv.yoga.reviewer));
+  if(rv.doctor && rv.doctor.reviewer) names.push(esc(rv.doctor.reviewer)+' (Doctor)');
+  if(rv.dietician && rv.dietician.reviewer) names.push(esc(rv.dietician.reviewer)+' (Dietician)');
+  if(rv.yoga && rv.yoga.reviewer) names.push(esc(rv.yoga.reviewer)+' (Yoga Therapist)');
 
   var labFull = rep.Lab || '';   /* full "Sample From" name, e.g. S.B PATHOLOGY LAB */
   var coupon = rep.Coupon || ('JK-'+String(rep.Ref||'').slice(-4));
@@ -216,7 +227,7 @@ function renderSheet(rep, rv){
    +'<span style="margin-left:12px;color:var(--muted);font-size:13px">Prints as a separate A4 page on report stock.</span></div>'
    +'<div class="psheet"><div class="reserved"></div><div class="body">'
    +'<div class="title">'+esc(labFull)+' KI TARAF SE</div>'
-   +'<div class="subtitle">Aapki report — aasan bhasha mein, ek doctor aur health expert dwara samjhaayi gayi</div>'
+   +'<div class="subtitle">Aapki report — aasan bhasha mein, ek doctor aur JeevanKey health team dwara samjhaayi gayi</div>'
    +'<div class="box">'
    +'<div>Ref No. : '+esc(rep.Ref||'')+'</div><div>Age/Sex : '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')+'</div>'
    +'<div>Profile : '+esc(rep.Profile||'')+'</div><div>Lab : '+esc(labFull)+'</div>'
@@ -224,70 +235,84 @@ function renderSheet(rep, rv){
    +flag+pr+se+normalBlock+qHtml
    +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(dietTxt)+'</p>'
    +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(yogaTxt)+'</p>'
-   /* ---------- FRONT PAGE: review + light marketing ---------- */
+   /* ---------- FRONT PAGE: clinical value only, NO money/offer ---------- */
    +'<div class="offer">'
-   +'<div class="offer-hd">Report toh mil gayi. Ab aage kya?</div>'
+   +'<div class="offer-hd">Report samajhna zaroori hai — sirf number dekhna kaafi nahi</div>'
    +'<div class="offer-why">'
-   +'Google par har value ka matlab alag milta hai — aur darr zyada. '
-   +'JeevanKey mein ek doctor aur ek health expert dono milkar aapki poori report dekhte hain, '
-   +'aur aapke apne doctor ke saath kaam karte hain — unke khilaaf nahi.'
+   +'Google par har value ka matlab alag milta hai, aur darr zyada. '
+   +'Isiliye is report ko ek doctor aur JeevanKey ki health team ne milkar dekha aur aasan bhasha mein samjhaaya hai — '
+   +'taaki aap apne doctor se sahi baat kar sakein.'
    +'</div>'
-   +'<div class="oc-t" style="text-align:center">Ek baar poori baat karni hai</div>'
-   +'<div class="oc-p" style="text-align:center"><s>₹999</s> <b>₹499</b></div>'
-   +'<div class="oc-d" style="text-align:center">Doctor + Health Expert · ek consultation</div>'
-   +'<div class="coupon-label">Aapka special code</div>'
-   +'<div class="code">'+esc(coupon)+'</div>'
-   +'<div class="howto">'
-   +'<b>Kaise istemaal karein:</b> WhatsApp par <b>97600 15878</b> par yeh code bhejein → '
-   +'Coordinator aapse baat karega → Doctor aur Health Expert dono se consultation. '
-   +'Yeh code <b>30 din</b> tak maanya hai. Peeche wale panne par poori jaankari.'
-   +'</div>'
-   +'<div class="web">WhatsApp 97600 15878 &nbsp;·&nbsp; jeevankey.com</div>'
+   +'<div class="offer-why" style="margin-bottom:0"><b>Aage kya karna hai — poori jaankari peeche wale panne par di gayi hai.</b></div>'
    +'</div>'
    +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
    +'<div class="disc">Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
    +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hai.</div>'
    +'</div></div>'
 
-   /* ---------- BACK PAGE: promotion + hiring ---------- */
+   /* ---------- BACK PAGE: full offer + promotion + hiring ---------- */
    +'<div class="psheet page2"><div class="body">'
    +'<div class="title">JEEVANKEY — AAGE KYA?</div>'
 
-   +'<h3>Ek report se pata chalta hai. Badalta nahi.</h3>'
+   +'<h3>Ek report se pata chalta hai — badalta nahi</h3>'
    +'<p class="p2">Values ek din mein nahi bantin, aur ek din mein sudhartin bhi nahi. '
-   +'Jo cheezein sach mein farak laati hain — khana, neend, chalna-phirna, aur dawai ka sahi asar — '
+   +'Jo cheezein sach mein farak laati hain — khana, neend, tanaav, dincharya, aur dawai ka sahi asar — '
    +'unme <b>2 se 3 mahine</b> lagte hain. Us poore samay koi aapke saath ho, yahi JeevanKey ka kaam hai.</p>'
+
+   +'<h3>Kaun log aapke saath hote hain</h3>'
+   +'<p class="p2">JeevanKey mein ek poori team hoti hai — ek <b>doctor</b>, ek <b>dietician</b>, ek '
+   +'<b>yoga therapist</b>, aur zarurat ke hisaab se <b>mental wellness counsellor</b> ya wellness coach. '
+   +'Sab ek hi WhatsApp par, milkar aapke ek hi case par kaam karte hain.</p>'
+
+   +'<div class="withdoc">'
+   +'<b>Aapke apne doctor ke saath.</b> JeevanKey ki health team aapke doctor ki hi salah ko follow karne mein madad karti hai — '
+   +'unke against nahi. <b>Agar aapka koi doctor nahi hai, toh hum ek doctor bhi dete hain</b>, poori health team ke saath.'
+   +'</div>'
 
    +'<h3>Kya milta hai monthly plan mein</h3>'
    +'<table class="t2">'
-   +'<tr><td class="k">Poori team</td><td>Ek doctor, ek dietician, aur zarurat ke hisaab se yoga ya wellness expert — sab ek hi WhatsApp par</td></tr>'
+   +'<tr><td class="k">Poori team</td><td>Doctor, dietician, yoga therapist aur zarurat par mental wellness counsellor — sab ek WhatsApp par</td></tr>'
    +'<tr><td class="k">Har hafte check</td><td>Kya chal raha hai, kya nahi — poocha jaata hai. Aap akele nahi chhode jaate.</td></tr>'
    +'<tr><td class="k">Plan badalta hai</td><td>Jo kaam na kare, woh badla jaata hai. Ek hi plan mahino tak nahi chalta.</td></tr>'
    +'<tr><td class="k">Agli report tak</td><td>Jab agli jaanch ho, tab tak aapke saath — aur uske baad bhi samjhaane ke liye.</td></tr>'
-   +'<tr><td class="k">Aapke doctor ke saath</td><td>Unki hi salah ko follow karne mein madad. Hum unki jagah nahi lete.</td></tr>'
    +'</table>'
 
-   +'<div class="plans">'
-   +'<div class="pl"><div class="pl-n">Essential</div><div class="pl-p">₹2,499</div><div class="pl-d">/mahina</div></div>'
-   +'<div class="pl"><div class="pl-n">Premium</div><div class="pl-p">₹4,499</div><div class="pl-d">/mahina</div></div>'
-   +'<div class="pl"><div class="pl-n">Elite</div><div class="pl-p">₹7,499</div><div class="pl-d">/mahina · poora parivaar</div></div>'
+   +'<h3>Do tareeke</h3>'
+   +'<div class="offer-grid2">'
+   +'<div class="og-col"><div class="og-t">Ek baar poori baat</div>'
+   +'<div class="og-p"><s>₹999</s> <b>₹499</b></div>'
+   +'<div class="og-d">Doctor + health team se ek consultation</div></div>'
+   +'<div class="og-col"><div class="og-t">Poora sudhaar</div>'
+   +'<div class="og-p"><b>₹2,499</b><span class="pm">/mahina</span></div>'
+   +'<div class="og-d">Poori team, har hafte, agli report tak</div></div>'
    +'</div>'
-   +'<p class="p2 small">Ghar mein kisi aur ki report bhi hai? Apne plan mein family member add kar sakte hain.</p>'
+
+   +'<div class="plans">'
+   +'<div class="pl"><div class="pl-n">Essential</div><div class="pl-p">₹2,499</div><div class="pl-d">/mahina · aap</div></div>'
+   +'<div class="pl"><div class="pl-n">Premium</div><div class="pl-p">₹4,499</div><div class="pl-d">/mahina · aap</div></div>'
+   +'<div class="pl"><div class="pl-n">Elite</div><div class="pl-p">₹7,499</div><div class="pl-d">/mahina · aap + 3 family</div></div>'
+   +'</div>'
+   +'<p class="p2 small">Ghar mein kisi aur ki bhi dekhbhal chahiye? Har plan mein family member add kiya ja sakta hai.</p>'
 
    +'<h3>Aur ek baat — kaam ki</h3>'
    +'<p class="p2"><b>JeevanKey Haridwar mein hai, aur Haridwar se hi hire karta hai.</b><br>'
-   +'Coordinator, field aur support roles ke liye hum <b>pehle apne members ke parivaar se</b> resume dekhte hain. '
-   +'Agar ghar mein koi kaam dhoondh raha hai, resume bhej dein — WhatsApp par.<br>'
-   +'<span class="small">Doctor aur expert panel sirf qualification par chuna jaata hai.</span></p>'
+   +'Coordinator, field aur support roles ke liye hum resume <b>sirf apne monthly subscribers ke parivaar se</b> lete hain. '
+   +'Yaani jo log JeevanKey ka monthly plan lete hain, unke ghar walon ko in naukriyon mein pehla mauka milta hai.<br>'
+   +'<span class="small">(Sirf report review karwane se yeh mauka nahi milta — iske liye monthly plan lena zaroori hai. '
+   +'Doctor aur expert panel sirf qualification par chuna jaata hai.)</span></p>'
 
    +'<div class="cta2">'
    +'<div class="cta2-t">Shuru karna hai?</div>'
-   +'<div class="coupon-label">Aapka code</div>'
+   +'<div class="coupon-label">Aapka special coupon code</div>'
    +'<div class="code">'+esc(coupon)+'</div>'
-   +'<div class="oc-d">WhatsApp <b>97600 15878</b> par yeh code bhejein · 30 din tak maanya</div>'
+   +'<div class="howto2"><b>Kaise istemaal karein:</b> WhatsApp par <b>97600 15878</b> par yeh coupon code bhejein → '
+   +'JeevanKey representative aapse baat karenge → doctor aur health team se consultation. '
+   +'Yeh code <b>30 din</b> tak maanya hai.</div>'
    +'<div class="web">jeevankey.com &nbsp;·&nbsp; Haridwar, Uttarakhand</div>'
    +'</div>'
-   +'<div class="disc">JeevanKey ek coordinated care service hai. Yeh kisi bhi lab ya pharmacy se juda hua nahi hai. '
+   +'<div class="disc">Yeh coupon code Immuno Diagnostics Pvt. Ltd. ke saath partnership mein diya gaya hai, '
+   +'sirf JeevanKey ki pehli consultation ke liye. '
+   +'JeevanKey ek coordinated care service hai — kisi bhi lab ya pharmacy se juda hua nahi. '
    +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hoti.</div>'
    +'</div></div>';
   $('sheet').scrollIntoView({behavior:'smooth'});
