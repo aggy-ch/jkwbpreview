@@ -68,11 +68,14 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .psheet .t2 td{border-bottom:1px solid #ccc;padding:5px 4px;vertical-align:top;line-height:1.45}
 .psheet .t2 td.k{font-weight:700;width:32%;white-space:nowrap}
 .psheet .plans{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #000;margin:10px 0 6px}
-.psheet .pl{padding:8px 6px;text-align:center;border-right:1px solid #000}
+.psheet .pl{padding:8px 7px;text-align:center;border-right:1px solid #000}
 .psheet .pl:last-child{border-right:none}
-.psheet .pl-n{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em}
+.psheet .pl-n{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.psheet .pl-tag{display:inline-block;font-size:7px;background:#000;color:#fff;padding:1px 4px;border-radius:2px;letter-spacing:.04em;vertical-align:middle}
 .psheet .pl-p{font-size:15px;font-weight:700;line-height:1.15}
 .psheet .pl-d{font-size:8.5px}
+.psheet .pl-x{font-size:8px;line-height:1.35;margin-top:4px;text-align:left;color:#222}
+.psheet .refund{border:1px solid #000;padding:8px 11px;margin:8px 0;font-size:9.5px;line-height:1.55;background:#f4f4f4}
 .psheet .cta2{border:1.5px solid #000;padding:11px;text-align:center;margin-top:14px}
 .psheet .cta2-t{font-weight:700;font-size:12px}
 .psheet .withdoc{border-left:3px solid #000;padding:8px 11px;margin:10px 0;font-size:10.5px;line-height:1.55;background:#f7f7f7}
@@ -247,7 +250,8 @@ function renderSheet(rep, rv){
    +'</div>'
    +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
    +'<div class="disc">Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
-   +'JeevanKey ke expert fixed fees par kaam karte hain — kisi test ya dawai se unki koi commission nahi hoti.</div>'
+   +'JeevanKey ke medical experts ek independent clinical review team ki tarah kaam karte hain, '
+   +'kisi bhi dawai ya diagnostic lab se swatantra.</div>'
    +'</div></div>'
 
    /* ---------- BACK PAGE: full offer + promotion + hiring ---------- */
@@ -277,26 +281,39 @@ function renderSheet(rep, rv){
    +'<tr><td class="k">Agli report tak</td><td>Jab agli jaanch ho, tab tak aapke saath — aur uske baad bhi samjhaane ke liye.</td></tr>'
    +'</table>'
 
-   +'<h3>Do tareeke</h3>'
+   +'<h3>Aapke liye do raaste</h3>'
    +'<div class="offer-grid2">'
-   +'<div class="og-col"><div class="og-t">Ek baar try karein</div>'
+   +'<div class="og-col"><div class="og-t">Pehle samajhna hai</div>'
    +'<div class="og-p"><b>₹499</b><span class="pm"> one-time</span></div>'
    +'<div class="og-d">Health Clarity Trial — sahi expert se ek consultation, '
-   +'48 ghante ka follow-up, aur clear salah ki aage kya karna hai</div></div>'
+   +'48 ghante ka follow-up, aur clear salah ki aage kya karna hai. '
+   +'Monthly plan lene par yeh ₹499 pehle mahine mein adjust ho jaata hai.</div></div>'
    +'<div class="og-col"><div class="og-t">Poora sudhaar chahiye</div>'
-   +'<div class="og-p"><b>₹2,499</b><span class="pm">/mahina se</span></div>'
-   +'<div class="og-d">Ek monthly team jo har mahine aapke saath rehti hai</div></div>'
+   +'<div class="og-p"><b>Monthly Plan</b></div>'
+   +'<div class="og-d">Ek team jo har mahine aapke saath rehti hai — '
+   +'niche teen options mein se chunein</div></div>'
    +'</div>'
-   +'<p class="p2 small">Trial plan lene par, agar aap monthly plan mein aage badhte hain, '
-   +'toh pehle mahine mein wahi ₹499 adjust kar diya jaata hai.</p>'
 
    +'<div class="plans">'
-   +'<div class="pl"><div class="pl-n">Essential</div><div class="pl-p">₹2,499</div><div class="pl-d">/mahina · chhoti team</div></div>'
-   +'<div class="pl"><div class="pl-n">Premium</div><div class="pl-p">₹4,499</div><div class="pl-d">/mahina · teen expert</div></div>'
-   +'<div class="pl"><div class="pl-n">Elite</div><div class="pl-p">₹7,499</div><div class="pl-d">/mahina · aap + 2 family</div></div>'
+   +'<div class="pl"><div class="pl-n">Essential</div><div class="pl-p">₹2,499</div><div class="pl-d">/mahina</div>'
+   +'<div class="pl-x">Ek chhoti expert team, mahine bhar WhatsApp access, aur mahine ke ant mein check-in. '
+   +'Ek-do health concern ke liye.</div></div>'
+   +'<div class="pl"><div class="pl-n">Premium <span class="pl-tag">popular</span></div><div class="pl-p">₹4,499</div><div class="pl-d">/mahina</div>'
+   +'<div class="pl-x">Teen expert ki poori team, test/scan connect karne mein madad, aur har mahine check-in. '
+   +'Ek se zyada judi hui problems ke liye.</div></div>'
+   +'<div class="pl"><div class="pl-n">Elite</div><div class="pl-p">₹7,499</div><div class="pl-d">/mahina · aap + 2 family</div>'
+   +'<div class="pl-x">Comprehensive team, priority response, aur har mahine poori conversation. '
+   +'Lambi ya complex health journey ke liye.</div></div>'
    +'</div>'
-   +'<p class="p2 small">Har plan mein family member add kiya ja sakta hai. Har monthly plan par '
-   +'baaki dino ka refund milta hai.</p>'
+   +'<p class="p2 small">Har plan mein family member add kiya ja sakta hai.</p>'
+
+   +'<div class="refund">'
+   +'<b>Bharosa ki baat:</b> Har monthly plan par, shuruaati dino ke baad ke '
+   +'<b>baaki din ka refund</b> milta hai. Agar hume lage ki aapko apne plan se zyada support chahiye, '
+   +'hum khud aapko bata denge — ya toh upgrade karein, ya baaki dino ka paisa wapas. '
+   +'JeevanKey aapka paisa rokne ke liye nahi, aapko theek karne ke liye hai.'
+   +'</div>'
+   +'<p class="p2 small">Sabhi plans ki poori jaankari: <b>jeevankey.com/#plans</b></p>'
 
    +'<h3>Aur ek baat — kaam ki</h3>'
    +'<p class="p2"><b>Coordinator, field aur support roles ke liye hum resume '
@@ -315,8 +332,9 @@ function renderSheet(rep, rv){
    +'<div class="web">jeevankey.com</div>'
    +'</div>'
    +'<div class="disc">Yeh review Immuno Diagnostics Pvt. Ltd. ke saath partnership mein diya gaya hai. '
-   +'JeevanKey ke doctor aur expert fixed fees par kaam karte hain — kisi test, jaanch, ya dawai se '
-   +'unki koi kamai ya commission nahi hoti. Isiliye woh sirf wahi salah dete hain jo aapke liye sahi ho.</div>'
+   +'JeevanKey ke medical experts ek independent clinical review team ki tarah kaam karte hain — '
+   +'hamara poora dhyan sirf aapki report ke data ko sahi tareeke se samajhne par hota hai. '
+   +'Salah dene mein hum kisi bhi dawai ya diagnostic lab se poori tarah swatantra (independent) hain.</div>'
    +'</div></div>';
   $('sheet').scrollIntoView({behavior:'smooth'});
 }
