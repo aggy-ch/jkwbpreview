@@ -36,9 +36,10 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 #sheet{margin-top:16px}
 .psheet{background:#fff;color:#000;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.45;
   width:210mm;margin:0 auto;padding:0;position:relative}
-.psheet .reserved{height:62mm}         /* reduced — aligns just above where report values start */
+.psheet .reserved{height:54mm}
 .psheet .body{padding:0 14mm 8mm}
-.psheet.page2 .reserved{height:62mm}   /* same on page 2 for identical alignment */
+.psheet.page2 .reserved{height:54mm}
+.psheet .caphook{font-style:italic;font-weight:600;color:#000}
 
 .psheet .pointer{border:1.5px solid #000;background:#fff;padding:9px 12px;margin:12px 0;font-size:10.5px;line-height:1.5;text-align:center}
 .psheet .mini-coupon{border:1px dashed #000;padding:8px 11px;margin:12px 0;font-size:10px;line-height:1.5;text-align:center}
@@ -46,15 +47,16 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .psheet .mini-coupon .mc-off{font-size:9.5px}
 .psheet .mini-coupon s{color:#555}
 
-.psheet .pcard{border:1px solid #000;padding:8px 10px;margin-bottom:7px}
-.psheet .pc-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.psheet .pc-n{font-weight:700;font-size:12px;letter-spacing:.03em}
-.psheet .pc-tag{font-size:7.5px;background:#000;color:#fff;padding:1px 5px;border-radius:2px;letter-spacing:.03em}
-.psheet .pc-p{margin-left:auto;font-size:15px;font-weight:700}
-.psheet .pc-p small{font-size:9px;font-weight:400}
-.psheet .pc-doc{font-size:9.5px;margin:2px 0 4px;padding:2px 0;border-bottom:1px dotted #999}
-.psheet .pc-list{margin:0;padding-left:15px;font-size:9px;line-height:1.4}
-.psheet .pc-list li{margin-bottom:2px}
+.psheet .ptable{width:100%;border-collapse:collapse;margin:6px 0;font-size:8.5px}
+.psheet .ptable td{border:1px solid #000;padding:3px 5px;text-align:center;vertical-align:middle;line-height:1.3}
+.psheet .ptable td.pt-k{text-align:left;font-weight:600;width:34%}
+.psheet .pt-head td{font-weight:700;font-size:10px;letter-spacing:.03em;background:#000;color:#fff}
+.psheet .pt-head td:first-child{background:#fff}
+.psheet .pt-age td{font-size:8px;color:#333;font-style:italic;border-top:none}
+.psheet .pt-price td{font-weight:700;font-size:12px}
+.psheet .pt-price td small{font-size:7.5px;font-weight:400}
+.psheet .pt-price2 td{font-weight:700;font-size:11px;background:#f2f2f2}
+.psheet .pt-price2 td small{font-size:7.5px;font-weight:400}
 
 .psheet .withdoc2{border-left:3px solid #000;padding:7px 10px;margin:8px 0;font-size:9.5px;line-height:1.5;background:#f7f7f7}
 .psheet .hiring{border:1px solid #000;padding:8px 11px;margin:8px 0;font-size:10px;line-height:1.5}
@@ -236,6 +238,19 @@ function renderSheet(rep, rv){
   var yogaTxt = yog && yog.yoga ? yog.yoga : GENERIC.yoga;
   var yogaGen = !(yog && yog.yoga);
 
+  /* Option C failsafe: cap long reviews so page 2 always fits in one sheet.
+     A long review becomes a conversion hook — rest delivered in consultation. */
+  var CAP=420;   /* chars; ~6 lines. tune if needed */
+  function capReview(t){
+    if(t.length<=CAP) return {text:t, capped:false};
+    var cut=t.slice(0,CAP);
+    var lastStop=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('।'),cut.lastIndexOf(', '));
+    if(lastStop>CAP*0.6) cut=t.slice(0,lastStop+1);
+    return {text:cut.trim(), capped:true};
+  }
+  var dietC=capReview(dietTxt), yogaC=capReview(yogaTxt);
+  var capHook=' <span class="caphook">…poori salah aapke WhatsApp consultation mein di jaayegi.</span>';
+
   /* reviewer names, matching Immuno report footer style: "Name" on its own line */
   /* reviewer names WITH role, matching Immuno report footer style */
   var names=[];
@@ -301,9 +316,9 @@ function renderSheet(rep, rv){
    +'<div class="psheet page2"><div class="reserved"></div><div class="body">'
    +'<div class="title">'+esc(labFull)+' — AAPKA HEALTH PLAN</div>'
 
-   /* the diet/yoga reviews — now the reason page 2 is missed if dropped */
-   +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(dietTxt)+'</p>'
-   +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(yogaTxt)+'</p>'
+   /* the diet/yoga reviews — capped (Option C) so page 2 stays one sheet */
+   +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(dietC.text)+(dietC.capped?capHook:'')+'</p>'
+   +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(yogaC.text)+(yogaC.capped?capHook:'')+'</p>'
 
    +'<h3>Ek report se pata chalta hai — badalta nahi</h3>'
    +'<p class="p2">Values ek din mein nahi bantin. Jo cheezein farak laati hain — khana, neend, tanaav, '
@@ -311,39 +326,20 @@ function renderSheet(rep, rv){
    +'Us poore samay koi aapke saath ho, yahi JeevanKey ka kaam hai.</p>'
 
    +'<h3>Kya milta hai monthly plan mein</h3>'
-
-   +'<div class="pcard">'
-   +'<div class="pc-top"><span class="pc-n">ESSENTIAL</span><span class="pc-tag">POPULAR · 20+</span>'
-   +'<span class="pc-p">₹2,499<small>/mahina</small></span></div>'
-   +'<div class="pc-doc">Apne doctor ke saath: <b>₹1,999/mahina</b></div>'
-   +'<ul class="pc-list">'
-   +'<li><b>Chhoti Expert Team:</b> JeevanKey Health Manager + ek Doctor (MBBS/GP, BAMS, ya BHMS) + ek Health Expert (Dietician, Physiotherapist, ya Wellness Coach)</li>'
-   +'<li><b>WhatsApp Access:</b> mahine bhar jab chahein sawal poochein ya madad lein</li>'
-   +'<li><b>Monthly Check-in:</b> mahine ke ant mein poori health ka clear assessment</li>'
-   +'<li><b>Kiske liye:</b> 1–2 health concern par kaam kar rahe log (diet, energy, immunity, stress)</li>'
-   +'</ul></div>'
-
-   +'<div class="pcard">'
-   +'<div class="pc-top"><span class="pc-n">PREMIUM</span><span class="pc-tag">POPULAR · 40+</span>'
-   +'<span class="pc-p">₹4,499<small>/mahina</small></span></div>'
-   +'<div class="pc-doc">Apne doctor ke saath: <b>₹3,499/mahina</b></div>'
-   +'<ul class="pc-list">'
-   +'<li><b>Poori Expert Team:</b> aapki problem ke hisaab se chune 3 bade experts (Doctor + MD Specialist/Gynaecologist, Dietician, Psychotherapist, Physiotherapist, ya Yoga Specialist)</li>'
-   +'<li><b>Conflict Resolution:</b> experts ki salah alag ho toh JeevanKey aasan bhasha mein balance karke samjhaata hai</li>'
-   +'<li><b>Test & Scan Assistance:</b> agli sahi jaanch aur scans connect karne mein poori madad</li>'
-   +'<li><b>Kiske liye:</b> ek se zyada judi problems (thyroid + work-stress, ya irregular periods + fatigue)</li>'
-   +'</ul></div>'
-
-   +'<div class="pcard">'
-   +'<div class="pc-top"><span class="pc-n">ELITE</span><span class="pc-tag">POPULAR · 60+</span>'
-   +'<span class="pc-p">₹7,499<small>/mahina</small></span></div>'
-   +'<div class="pc-doc">Aap + 1 family member · Apne doctor ke saath: <b>₹5,999/mahina</b></div>'
-   +'<ul class="pc-list">'
-   +'<li><b>Poora Parivaar Safe:</b> ek hi plan mein ghar ke 2 sadashya poori tarah cover</li>'
-   +'<li><b>Comprehensive Panel:</b> sabhi members ke liye unki health ke mutabik customized expert teams</li>'
-   +'<li><b>Priority Response:</b> bina intezaar, sabse pehle aur fast reply</li>'
-   +'<li><b>Kiske liye:</b> lambi, complex, ya chronic bimarion se lad rahe poore parivaar ke liye</li>'
-   +'</ul></div>'
+   +'<table class="ptable">'
+   +'<tr class="pt-head"><td></td><td>ESSENTIAL</td><td>PREMIUM</td><td>ELITE</td></tr>'
+   +'<tr class="pt-age"><td></td><td>20–39 saal</td><td>40–59 saal</td><td>60+ saal</td></tr>'
+   +'<tr class="pt-price"><td class="pt-k">Standard</td><td>₹2,499<small>/mah</small></td><td>₹4,499<small>/mah</small></td><td>₹7,499<small>/mah</small></td></tr>'
+   +'<tr class="pt-price2"><td class="pt-k">Apne doctor ke saath</td><td>₹1,999<small>/mah</small></td><td>₹3,499<small>/mah</small></td><td>₹5,999<small>/mah</small></td></tr>'
+   +'<tr><td class="pt-k">Health team size (Health Manager ke saath)</td><td>3</td><td>4</td><td>5</td></tr>'
+   +'<tr><td class="pt-k">WhatsApp access — mahine bhar</td><td>✓</td><td>✓</td><td>✓</td></tr>'
+   +'<tr><td class="pt-k">Poori team ka check-in</td><td>Mahine mein 1 baar</td><td>Mahine mein 2 baar</td><td>Har hafte</td></tr>'
+   +'<tr><td class="pt-k">Alag-alag salah ko ek jagah samjhaana</td><td>—</td><td>✓</td><td>✓</td></tr>'
+   +'<tr><td class="pt-k">Test/scan par paisa bachaana (100% guarantee)</td><td>—</td><td>✓</td><td>✓</td></tr>'
+   +'<tr><td class="pt-k">Priority (fast) response</td><td>—</td><td>—</td><td>✓</td></tr>'
+   +'<tr><td class="pt-k">Kitne log cover</td><td>1 log</td><td>1 log</td><td>2 log</td></tr>'
+   +'<tr><td class="pt-k">Extra member add karein</td><td>+₹999<small>/mah</small></td><td>+₹1,999<small>/mah</small></td><td>+₹3,499<small>/mah</small></td></tr>'
+   +'</table>'
 
    +'<div class="withdoc2">'
    +'<b>Apne doctor ke saath (kam daam):</b> Agar aapke doctor raazi hon, toh woh bhi aapki team mein juud sakte hain. '
@@ -352,7 +348,8 @@ function renderSheet(rep, rv){
    +'</div>'
 
    +'<div class="refund">'
-   +'<b>Bharosa ki baat:</b> Har monthly plan par shuruaati dino ke baad ke <b>baaki din ka refund</b> milta hai. '
+   +'<b>Bharosa ki baat:</b> Plan chhodne par, jo din aapne istemaal nahi kiye '
+   +'un <b>baaki dino ka paisa wapas</b> milta hai. '
    +'Agar hume lage ki aapko zyada support chahiye, hum khud bata denge — upgrade karein ya paisa wapas. '
    +'<span class="hl">JeevanKey aapka paisa rokne ke liye nahi, aapko theek karne ke liye hai.</span> '
    +'Poori jaankari: jeevankey.com/#plans'
