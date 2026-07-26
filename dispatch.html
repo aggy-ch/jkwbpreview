@@ -36,8 +36,29 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 #sheet{margin-top:16px}
 .psheet{background:#fff;color:#000;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.45;
   width:210mm;margin:0 auto;padding:0;position:relative}
-.psheet .reserved{height:78mm}         /* aligns with "Sample Collection Date/Time" row */
-.psheet .body{padding:0 14mm 10mm}
+.psheet .reserved{height:62mm}         /* reduced — aligns just above where report values start */
+.psheet .body{padding:0 14mm 8mm}
+.psheet.page2 .reserved{height:62mm}   /* same on page 2 for identical alignment */
+
+.psheet .pointer{border:1.5px solid #000;background:#fff;padding:9px 12px;margin:12px 0;font-size:10.5px;line-height:1.5;text-align:center}
+.psheet .mini-coupon{border:1px dashed #000;padding:8px 11px;margin:12px 0;font-size:10px;line-height:1.5;text-align:center}
+.psheet .mini-coupon .mc-code{font-family:'Courier New',monospace;font-weight:700;font-size:12px}
+.psheet .mini-coupon .mc-off{font-size:9.5px}
+.psheet .mini-coupon s{color:#555}
+
+.psheet .pcard{border:1px solid #000;padding:8px 10px;margin-bottom:7px}
+.psheet .pc-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.psheet .pc-n{font-weight:700;font-size:12px;letter-spacing:.03em}
+.psheet .pc-tag{font-size:7.5px;background:#000;color:#fff;padding:1px 5px;border-radius:2px;letter-spacing:.03em}
+.psheet .pc-p{margin-left:auto;font-size:15px;font-weight:700}
+.psheet .pc-p small{font-size:9px;font-weight:400}
+.psheet .pc-doc{font-size:9.5px;margin:2px 0 4px;padding:2px 0;border-bottom:1px dotted #999}
+.psheet .pc-list{margin:0;padding-left:15px;font-size:9px;line-height:1.4}
+.psheet .pc-list li{margin-bottom:2px}
+
+.psheet .withdoc2{border-left:3px solid #000;padding:7px 10px;margin:8px 0;font-size:9.5px;line-height:1.5;background:#f7f7f7}
+.psheet .hiring{border:1px solid #000;padding:8px 11px;margin:8px 0;font-size:10px;line-height:1.5}
+.psheet .refund .hl{background:#ffe;font-weight:700;padding:0 2px;box-shadow:inset 0 -6px 0 #f4e9a8}
 .psheet .title{text-align:center;font-weight:700;font-size:12px;text-decoration:underline;
   letter-spacing:.02em;margin:0 0 4px}
 .psheet .subtitle{text-align:center;font-size:10px;margin:0 0 12px;color:#222}
@@ -227,110 +248,135 @@ function renderSheet(rep, rv){
 
   $('sheet').innerHTML=
    '<div class="noprint" style="text-align:center;margin:16px 0"><button onclick="window.print()">Print / Save PDF</button>'
-   +'<span style="margin-left:12px;color:var(--muted);font-size:13px">Prints as a separate A4 page on report stock.</span></div>'
+   +'<span style="margin-left:12px;color:var(--muted);font-size:13px">Prints as 2 A4 pages on report stock. In print dialog, uncheck "Headers and footers".</span></div>'
+
+   /* ================= PAGE 1 — clinical, self-sufficient ================= */
    +'<div class="psheet"><div class="reserved"></div><div class="body">'
    +'<div class="title">'+esc(labFull)+' KI TARAF SE</div>'
-   +'<div class="subtitle">Aapki report — aasan bhasha mein, JeevanKey doctor aur health team dwara samjhaayi gayi</div>'
+   +'<div class="subtitle">Aapki report — aasan bhasha mein, JeevanKey ke ek doctor aur 2 health experts ne samjhaayi</div>'
    +'<div class="box">'
    +'<div>Ref No. : '+esc(rep.Ref||'')+'</div><div>Age/Sex : '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')+'</div>'
    +'<div>Profile : '+esc(rep.Profile||'')+'</div><div>Lab : '+esc(labFull)+'</div>'
    +'<div style="grid-column:1/-1">Name : '+esc(rep.Patient||'')+'</div></div>'
    +flag+pr+se+normalBlock+qHtml
-   +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(dietTxt)+'</p>'
-   +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p>'+esc(yogaTxt)+'</p>'
-   /* ---------- FRONT PAGE: clinical value only, NO money/offer ---------- */
+
+   /* why-explained (clinical framing, no offer) */
    +'<div class="offer">'
    +'<div class="offer-hd">Report samajhna zaroori hai — sirf number dekhna kaafi nahi</div>'
    +'<div class="offer-why">'
    +'Google par har value ka matlab alag milta hai, aur darr zyada. '
-   +'Isiliye is report ko ek doctor aur JeevanKey ki health team ne milkar dekha aur aasan bhasha mein samjhaaya hai — '
-   +'taaki aap apne doctor se sahi baat kar sakein.'
+   +'Isiliye is report ko JeevanKey ke ek doctor aur 2 health experts ne milkar dekha aur aasan bhasha mein '
+   +'samjhaaya hai — taaki aap apne doctor se sahi baat kar sakein.'
+   +'</div></div>'
+
+   /* THE ENFORCER: points to page 2, promises something the patient wants */
+   +'<div class="pointer">'
+   +'Aapki report ke hisaab se <b>khane mein kya badlein</b> aur <b>rozana kya karein</b> — '
+   +'iska plan JeevanKey ke Dietician aur Yoga Therapist ne banaya hai, '
+   +'is report ke <b>ANTIM PANNE (last page)</b> par. Zaroor dekhein.'
    +'</div>'
-   +'<div class="offer-why" style="margin-bottom:0"><b>Aage kya karna hai — poori jaankari peeche wale panne par di gayi hai.</b></div>'
+
+   /* doctor-trust box, moved up from page 2 */
+   +'<div class="withdoc">'
+   +'<b>Aapke apne doctor ke saath.</b> JeevanKey ki health team aapke doctor ki hi salah ko follow karne mein '
+   +'madad karti hai — unke against nahi. <b>Agar aapka koi doctor nahi hai, toh hum ek doctor bhi dete hain</b>, '
+   +'poori health team ke saath.'
    +'</div>'
+
+   /* minimal failsafe coupon — works even if page 2 is dropped */
+   +'<div class="mini-coupon">'
+   +'<b>Report ke baare mein baat karni hai?</b> '
+   +'WhatsApp <b>97600 15878</b> par yeh code bhejein: <span class="mc-code">'+esc(coupon)+'</span><br>'
+   +'<span class="mc-off">Pehle 100 logon ke liye <s>₹999</s> <b>₹499</b> — ek doctor + ek health expert se poori consultation. '
+   +'Poori jaankari antim panne par.</span>'
+   +'</div>'
+
    +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
    +'<div class="disc">Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
    +'JeevanKey ke medical experts ek independent clinical review team ki tarah kaam karte hain, '
-   +'kisi bhi dawai ya diagnostic lab se swatantra.</div>'
+   +'kisi bhi dawai ya diagnostic lab se swatantra. Aapki jaankari private rehti hai.</div>'
    +'</div></div>'
 
-   /* ---------- BACK PAGE: full offer + promotion + hiring ---------- */
-   +'<div class="psheet page2"><div class="body">'
-   +'<div class="title">JEEVANKEY — AAGE KYA?</div>'
+   /* ================= PAGE 2 — experts\' work + full offer ================= */
+   +'<div class="psheet page2"><div class="reserved"></div><div class="body">'
+   +'<div class="title">'+esc(labFull)+' — AAPKA HEALTH PLAN</div>'
+
+   /* the diet/yoga reviews — now the reason page 2 is missed if dropped */
+   +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(dietTxt)+'</p>'
+   +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(yogaTxt)+'</p>'
 
    +'<h3>Ek report se pata chalta hai — badalta nahi</h3>'
-   +'<p class="p2">Values ek din mein nahi bantin, aur ek din mein sudhartin bhi nahi. '
-   +'Jo cheezein sach mein farak laati hain — khana, neend, tanaav, dincharya, aur dawai ka sahi asar — '
-   +'unme <b>2 se 3 mahine</b> lagte hain. Us poore samay koi aapke saath ho, yahi JeevanKey ka kaam hai.</p>'
-
-   +'<h3>Kaun log aapke saath hote hain</h3>'
-   +'<p class="p2">JeevanKey mein ek poori team hoti hai — ek <b>doctor</b>, ek <b>dietician</b>, ek '
-   +'<b>yoga therapist</b>, aur zarurat ke hisaab se <b>mental wellness counsellor</b> ya wellness coach. '
-   +'Sab ek hi WhatsApp par, milkar aapke ek hi case par kaam karte hain.</p>'
-
-   +'<div class="withdoc">'
-   +'<b>Aapke apne doctor ke saath.</b> JeevanKey ki health team aapke doctor ki hi salah ko follow karne mein madad karti hai — '
-   +'unke against nahi. <b>Agar aapka koi doctor nahi hai, toh hum ek doctor bhi dete hain</b>, poori health team ke saath.'
-   +'</div>'
+   +'<p class="p2">Values ek din mein nahi bantin. Jo cheezein farak laati hain — khana, neend, tanaav, '
+   +'dincharya, aur dawai ka sahi asar — unme <b>2 se 3 mahine</b> lagte hain. '
+   +'Us poore samay koi aapke saath ho, yahi JeevanKey ka kaam hai.</p>'
 
    +'<h3>Kya milta hai monthly plan mein</h3>'
-   +'<table class="t2">'
-   +'<tr><td class="k">Poori team</td><td>Doctor, dietician, yoga therapist aur zarurat par mental wellness counsellor — sab ek WhatsApp par</td></tr>'
-   +'<tr><td class="k">Har hafte check</td><td>Kya chal raha hai, kya nahi — poocha jaata hai. Aap akele nahi chhode jaate.</td></tr>'
-   +'<tr><td class="k">Plan badalta hai</td><td>Jo kaam na kare, woh badla jaata hai. Ek hi plan mahino tak nahi chalta.</td></tr>'
-   +'<tr><td class="k">Agli report tak</td><td>Jab agli jaanch ho, tab tak aapke saath — aur uske baad bhi samjhaane ke liye.</td></tr>'
-   +'</table>'
 
-   +'<h3>Aapke liye do raaste</h3>'
-   +'<div class="offer-grid2">'
-   +'<div class="og-col"><div class="og-t">Pehle samajhna hai</div>'
-   +'<div class="og-p"><b>₹499</b><span class="pm"> one-time</span></div>'
-   +'<div class="og-d">Health Clarity Trial — sahi expert se ek consultation, '
-   +'48 ghante ka follow-up, aur clear salah ki aage kya karna hai. '
-   +'Monthly plan lene par yeh ₹499 pehle mahine mein adjust ho jaata hai.</div></div>'
-   +'<div class="og-col"><div class="og-t">Poora sudhaar chahiye</div>'
-   +'<div class="og-p"><b>Monthly Plan</b></div>'
-   +'<div class="og-d">Ek team jo har mahine aapke saath rehti hai — '
-   +'niche teen options mein se chunein</div></div>'
-   +'</div>'
+   +'<div class="pcard">'
+   +'<div class="pc-top"><span class="pc-n">ESSENTIAL</span><span class="pc-tag">POPULAR · 20+</span>'
+   +'<span class="pc-p">₹2,499<small>/mahina</small></span></div>'
+   +'<div class="pc-doc">Apne doctor ke saath: <b>₹1,999/mahina</b></div>'
+   +'<ul class="pc-list">'
+   +'<li><b>Chhoti Expert Team:</b> JeevanKey Health Manager + ek Doctor (MBBS/GP, BAMS, ya BHMS) + ek Health Expert (Dietician, Physiotherapist, ya Wellness Coach)</li>'
+   +'<li><b>WhatsApp Access:</b> mahine bhar jab chahein sawal poochein ya madad lein</li>'
+   +'<li><b>Monthly Check-in:</b> mahine ke ant mein poori health ka clear assessment</li>'
+   +'<li><b>Kiske liye:</b> 1–2 health concern par kaam kar rahe log (diet, energy, immunity, stress)</li>'
+   +'</ul></div>'
 
-   +'<div class="plans">'
-   +'<div class="pl"><div class="pl-n">Essential</div><div class="pl-p">₹2,499</div><div class="pl-d">/mahina</div>'
-   +'<div class="pl-x">Ek chhoti expert team, mahine bhar WhatsApp access, aur mahine ke ant mein check-in. '
-   +'Ek-do health concern ke liye.</div></div>'
-   +'<div class="pl"><div class="pl-n">Premium <span class="pl-tag">popular</span></div><div class="pl-p">₹4,499</div><div class="pl-d">/mahina</div>'
-   +'<div class="pl-x">Teen expert ki poori team, test/scan connect karne mein madad, aur har mahine check-in. '
-   +'Ek se zyada judi hui problems ke liye.</div></div>'
-   +'<div class="pl"><div class="pl-n">Elite</div><div class="pl-p">₹7,499</div><div class="pl-d">/mahina · aap + 2 family</div>'
-   +'<div class="pl-x">Comprehensive team, priority response, aur har mahine poori conversation. '
-   +'Lambi ya complex health journey ke liye.</div></div>'
+   +'<div class="pcard">'
+   +'<div class="pc-top"><span class="pc-n">PREMIUM</span><span class="pc-tag">POPULAR · 40+</span>'
+   +'<span class="pc-p">₹4,499<small>/mahina</small></span></div>'
+   +'<div class="pc-doc">Apne doctor ke saath: <b>₹3,499/mahina</b></div>'
+   +'<ul class="pc-list">'
+   +'<li><b>Poori Expert Team:</b> aapki problem ke hisaab se chune 3 bade experts (Doctor + MD Specialist/Gynaecologist, Dietician, Psychotherapist, Physiotherapist, ya Yoga Specialist)</li>'
+   +'<li><b>Conflict Resolution:</b> experts ki salah alag ho toh JeevanKey aasan bhasha mein balance karke samjhaata hai</li>'
+   +'<li><b>Test & Scan Assistance:</b> agli sahi jaanch aur scans connect karne mein poori madad</li>'
+   +'<li><b>Kiske liye:</b> ek se zyada judi problems (thyroid + work-stress, ya irregular periods + fatigue)</li>'
+   +'</ul></div>'
+
+   +'<div class="pcard">'
+   +'<div class="pc-top"><span class="pc-n">ELITE</span><span class="pc-tag">POPULAR · 60+</span>'
+   +'<span class="pc-p">₹7,499<small>/mahina</small></span></div>'
+   +'<div class="pc-doc">Aap + 1 family member · Apne doctor ke saath: <b>₹5,999/mahina</b></div>'
+   +'<ul class="pc-list">'
+   +'<li><b>Poora Parivaar Safe:</b> ek hi plan mein ghar ke 2 sadashya poori tarah cover</li>'
+   +'<li><b>Comprehensive Panel:</b> sabhi members ke liye unki health ke mutabik customized expert teams</li>'
+   +'<li><b>Priority Response:</b> bina intezaar, sabse pehle aur fast reply</li>'
+   +'<li><b>Kiske liye:</b> lambi, complex, ya chronic bimarion se lad rahe poore parivaar ke liye</li>'
+   +'</ul></div>'
+
+   +'<div class="withdoc2">'
+   +'<b>Apne doctor ke saath (kam daam):</b> Agar aapke doctor raazi hon, toh woh bhi aapki team mein juud sakte hain. '
+   +'Agar nahi, toh JeevanKey ke health experts unki salah ko follow karne mein aapki madad karte hain. '
+   +'Dono tarah — doctor ki salah hi chalti hai.'
    +'</div>'
-   +'<p class="p2 small">Har plan mein family member add kiya ja sakta hai.</p>'
 
    +'<div class="refund">'
-   +'<b>Bharosa ki baat:</b> Har monthly plan par, shuruaati dino ke baad ke '
-   +'<b>baaki din ka refund</b> milta hai. Agar hume lage ki aapko apne plan se zyada support chahiye, '
-   +'hum khud aapko bata denge — ya toh upgrade karein, ya baaki dino ka paisa wapas. '
-   +'JeevanKey aapka paisa rokne ke liye nahi, aapko theek karne ke liye hai.'
+   +'<b>Bharosa ki baat:</b> Har monthly plan par shuruaati dino ke baad ke <b>baaki din ka refund</b> milta hai. '
+   +'Agar hume lage ki aapko zyada support chahiye, hum khud bata denge — upgrade karein ya paisa wapas. '
+   +'<span class="hl">JeevanKey aapka paisa rokne ke liye nahi, aapko theek karne ke liye hai.</span> '
+   +'Poori jaankari: jeevankey.com/#plans'
    +'</div>'
-   +'<p class="p2 small">Sabhi plans ki poori jaankari: <b>jeevankey.com/#plans</b></p>'
 
-   +'<h3>Aur ek baat — kaam ki</h3>'
-   +'<p class="p2"><b>Coordinator, field aur support roles ke liye hum resume '
-   +'<u>sirf apne monthly subscribers ke parivaar se</u> lete hain.</b><br>'
-   +'Yaani jo log JeevanKey ka monthly plan lete hain, unke ghar walon ko in naukriyon mein pehla mauka milta hai.<br>'
-   +'<span class="small">(Sirf report review karwane se yeh mauka nahi milta — iske liye monthly plan lena zaroori hai. '
-   +'Doctor aur expert panel sirf qualification par chuna jaata hai.)</span></p>'
+   +'<div class="hiring">'
+   +'<b>Naukri ka mauka.</b> Coordinator, field aur support roles ke liye hum resume '
+   +'<u>sirf apne monthly subscribers ke parivaar se</u> lete hain. '
+   +'Jo log JeevanKey ka monthly plan lete hain, unke ghar walon ko in naukriyon mein pehla mauka milta hai. '
+   +'<span class="small">(Doctor aur expert panel sirf qualification par chuna jaata hai.)</span>'
+   +'</div>'
 
    +'<div class="cta2">'
    +'<div class="cta2-t">Shuru karna hai?</div>'
    +'<div class="coupon-label">Aapka special coupon code</div>'
    +'<div class="code">'+esc(coupon)+'</div>'
-   +'<div class="howto2"><b>Kaise istemaal karein:</b> WhatsApp par <b>97600 15878</b> par yeh coupon code bhejein → '
-   +'JeevanKey representative aapse baat karenge → aap Health Clarity Trial (₹499) se shuru kar sakte hain, '
-   +'ya seedhe monthly plan le sakte hain. Yeh code <b>30 din</b> tak maanya hai.</div>'
+   +'<div class="howto2"><b>Kaise istemaal karein:</b> WhatsApp par <b>97600 15878</b> par yeh code bhejein → '
+   +'JeevanKey representative aapse baat karenge. '
+   +'Is code ke saath pehle 100 logon ke liye <s>₹999</s> <b>₹499</b> — ek doctor (aapki pasand: Allopathic, '
+   +'Ayurvedic, ya Homeopathic — koi ek) aur ek health expert se ek poori consultation. '
+   +'Ya seedhe monthly plan lein. Code <b>30 din</b> tak maanya.</div>'
    +'<div class="web">jeevankey.com</div>'
    +'</div>'
+
    +'<div class="disc">Yeh review Immuno Diagnostics Pvt. Ltd. ke saath partnership mein diya gaya hai. '
    +'JeevanKey ke medical experts ek independent clinical review team ki tarah kaam karte hain — '
    +'hamara poora dhyan sirf aapki report ke data ko sahi tareeke se samajhne par hota hai. '
