@@ -39,7 +39,8 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .psheet .reserved{height:78mm}         /* aligns with "Sample Collection Date/Time" row */
 .psheet .body{padding:0 14mm 10mm}
 .psheet .title{text-align:center;font-weight:700;font-size:12px;text-decoration:underline;
-  letter-spacing:.02em;margin:0 0 10px}
+  letter-spacing:.02em;margin:0 0 4px}
+.psheet .subtitle{text-align:center;font-size:10px;margin:0 0 12px;color:#222}
 .psheet .box{border:1px solid #000;padding:7px 10px;font-size:10.5px;
   display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;margin-bottom:14px}
 .psheet h3{font-size:11px;font-weight:700;margin:14px 0 5px;border-bottom:1px solid #000;padding-bottom:3px}
@@ -53,7 +54,9 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .psheet .oc-p{font-size:16px;font-weight:700;line-height:1.2}
 .psheet .oc-p s{font-weight:400;font-size:12px;color:#555}
 .psheet .oc-d{font-size:9px;line-height:1.35;margin-top:3px}
-.psheet .code{font-family:'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:.05em;text-align:center;margin:9px 0 2px}
+.psheet .code{font-family:'Courier New',monospace;font-size:16px;font-weight:700;letter-spacing:.05em;text-align:center;margin:2px 0}
+.psheet .coupon-label{text-align:center;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#555;margin-top:8px}
+.psheet .howto{font-size:9.5px;line-height:1.5;margin:6px 0;padding:7px 9px;border:1px dotted #000;background:#fafafa}
 .psheet .web{font-weight:700;text-align:center;font-size:11px}
 
 /* ---- back page ---- */
@@ -212,7 +215,8 @@ function renderSheet(rep, rv){
    '<div class="noprint" style="text-align:center;margin:16px 0"><button onclick="window.print()">Print / Save PDF</button>'
    +'<span style="margin-left:12px;color:var(--muted);font-size:13px">Prints as a separate A4 page on report stock.</span></div>'
    +'<div class="psheet"><div class="reserved"></div><div class="body">'
-   +'<div class="title">JEEVANKEY REPORT REVIEW</div>'
+   +'<div class="title">'+esc(labFull)+' KI TARAF SE</div>'
+   +'<div class="subtitle">Aapki report — aasan bhasha mein, ek doctor aur health expert dwara samjhaayi gayi</div>'
    +'<div class="box">'
    +'<div>Ref No. : '+esc(rep.Ref||'')+'</div><div>Age/Sex : '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')+'</div>'
    +'<div>Profile : '+esc(rep.Profile||'')+'</div><div>Lab : '+esc(labFull)+'</div>'
@@ -231,10 +235,14 @@ function renderSheet(rep, rv){
    +'<div class="oc-t" style="text-align:center">Ek baar poori baat karni hai</div>'
    +'<div class="oc-p" style="text-align:center"><s>₹999</s> <b>₹499</b></div>'
    +'<div class="oc-d" style="text-align:center">Doctor + Health Expert · ek consultation</div>'
+   +'<div class="coupon-label">Aapka special code</div>'
    +'<div class="code">'+esc(coupon)+'</div>'
+   +'<div class="howto">'
+   +'<b>Kaise istemaal karein:</b> WhatsApp par <b>97600 15878</b> par yeh code bhejein → '
+   +'Coordinator aapse baat karega → Doctor aur Health Expert dono se consultation. '
+   +'Yeh code <b>30 din</b> tak maanya hai. Peeche wale panne par poori jaankari.'
+   +'</div>'
    +'<div class="web">WhatsApp 97600 15878 &nbsp;·&nbsp; jeevankey.com</div>'
-   +'<div class="oc-d" style="text-align:center;margin-top:3px">Yeh code batayein — 30 din tak maanya. '
-   +'Peeche wale panne par poori jaankari.</div>'
    +'</div>'
    +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
    +'<div class="disc">Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
@@ -274,9 +282,10 @@ function renderSheet(rep, rv){
 
    +'<div class="cta2">'
    +'<div class="cta2-t">Shuru karna hai?</div>'
+   +'<div class="coupon-label">Aapka code</div>'
    +'<div class="code">'+esc(coupon)+'</div>'
-   +'<div class="web">WhatsApp 97600 15878</div>'
-   +'<div class="oc-d">jeevankey.com &nbsp;·&nbsp; Haridwar, Uttarakhand</div>'
+   +'<div class="oc-d">WhatsApp <b>97600 15878</b> par yeh code bhejein · 30 din tak maanya</div>'
+   +'<div class="web">jeevankey.com &nbsp;·&nbsp; Haridwar, Uttarakhand</div>'
    +'</div>'
    +'<div class="disc">JeevanKey ek coordinated care service hai. Yeh kisi bhi lab ya pharmacy se juda hua nahi hai. '
    +'Kisi test ya dawai se JeevanKey ke kisi expert ki koi kamai nahi hoti.</div>'
