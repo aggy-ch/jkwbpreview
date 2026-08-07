@@ -270,6 +270,8 @@ function loadQueue(){
       if(!res.ok){$('qload').textContent='Error: '+(res.error||'could not load');return}
       $('qload').classList.add('hide');$('qcard').classList.remove('hide');
       var q=res.queue||[];
+      window.QUEUE_CACHE={};
+      q.forEach(function(x){ window.QUEUE_CACHE[String(x.ref)]=x; });
       var pending=q.filter(function(x){return !x.done});
       $('qcount').textContent=pending.length+' pending';
       if(!q.length){$('queueList').innerHTML='<p class="hint">Aaj ke liye koi report nahi hai abhi tak.</p>';return}
@@ -289,6 +291,21 @@ function openRef(ref){
   $('whoRefWrap').classList.remove('hide');$('whoRef').textContent=ref;
   $('f').classList.add('hide');$('out').innerHTML='';
   $('loading').classList.remove('hide');$('loading').textContent='Loading report…';
+  /* if the queue already carried full report data, render instantly — no server trip */
+  var cached=window.QUEUE_CACHE&&window.QUEUE_CACHE[ref];
+  if(cached&&cached.Flagged!==undefined){
+    render(cached);
+    /* resolve the Drive report link in the background (doesn't block the form) */
+    if(!cached.Report){
+      fetch(API_URL+'?action=getReport&ref='+encodeURIComponent(ref)+'&pass='+encodeURIComponent(PASS))
+        .then(function(r){return r.json()}).then(function(res){
+          if(res&&res.ok&&res.report&&res.report.Report){
+            $('viewReport').href=res.report.Report;$('viewReport').classList.remove('hide');
+          }
+        }).catch(function(){});
+    }
+    return;
+  }
   fetchReport();
 }
 function backToQueue(){ loadQueue(); }
@@ -326,7 +343,7 @@ function render(rep){
   $('draftBox').innerHTML='<h4>From report — out of range</h4>'
     + flags.map(function(x){return '<div class="flagged">'+esc(x)+'</div>'}).join('')
     + (rep.Normal?'<div class="check"><b>Normal:</b> '+esc(rep.Normal)+'</div>':'')
-    + (ROLE==='doctor'&&rep.Note?'<div class="check">⚑ '+esc(rep.Note)+'</div>':'');
+    + (rep.Note?'<div class="check">⚑ '+esc(rep.Note)+'</div>':'');
 
   if(ROLE==='doctor'||!RATES[ROLE]) setupDoctor(rep);
 }
