@@ -29,42 +29,38 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
 .n{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
 .mkbtn{padding:6px 12px;font-size:13px}
 
-/* printable sheet — matches the A4 report paper.
-   Top ~34% (up to ~290pt of 842) is left BLANK: on the physical report stock
-   that zone holds the QR, barcode, and patient detail box. This page prints
-   as a separate A4 sheet appended to the report, same stock, same identity. */
+/* ---- manual size control (screen only) ---- */
+.fitbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:4px;padding:10px 14px;margin:0 auto 12px;max-width:794px}
+.fitbar .fl{font-size:13px;color:var(--muted)}
+.fitbar .mono{font-family:'IBM Plex Mono',monospace}
+.fitbar .fb{width:34px;flex:none;padding:6px 0;font-size:18px;line-height:1}
+.fitbar .fb2{flex:none;padding:6px 12px;font-size:13px}
+.fitbar input[type=range]{flex:1;min-width:130px;background:transparent}
+
+/* ================= printable sheet — ONE A4 page =================
+   Top 50mm is left BLANK: on the physical report stock that zone holds
+   the QR, barcode, and patient detail box. This sheet prints on the same
+   stock, appended to the report. Font size auto-fits to fill one page
+   (see autoFitSheet), and can be nudged by hand with the control above. */
 #sheet{margin-top:16px}
-.psheet{background:#fff;color:#000;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.45;
-  width:210mm;margin:0 auto;padding:0;position:relative}
+.psheet{background:#fff;color:#000;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;
+  width:210mm;margin:0 auto;position:relative;box-shadow:0 1px 6px rgba(0,0,0,.15)}
 .psheet .reserved{height:50mm}
-.psheet .body{padding:0 14mm 8mm}
-.psheet.page2 .reserved{height:45mm}
-.psheet .caphook{font-style:italic;font-weight:600;color:#000}
-
-.psheet .pointer{border:1.5px solid #000;background:#fff;padding:9px 12px;margin:12px 0;font-size:10.5px;line-height:1.5;text-align:center}
-
-.psheet .withdoc2{border-left:3px solid #000;padding:7px 10px;margin:8px 0;font-size:9.5px;line-height:1.5;background:#f7f7f7}
-.psheet .title{text-align:center;font-weight:700;font-size:12px;text-decoration:underline;
-  letter-spacing:.02em;margin:0 0 4px}
-.psheet .subtitle{text-align:center;font-size:10px;margin:0 0 12px;color:#222}
-.psheet .box{border:1px solid #000;padding:7px 10px;font-size:10.5px;
-  display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;margin-bottom:14px}
-.psheet h3{font-size:11px;font-weight:700;margin:14px 0 5px;border-bottom:1px solid #000;padding-bottom:3px}
-.psheet ul{margin:0;padding-left:16px}.psheet li{margin-bottom:4px}
+.psheet .body{padding:0 15mm 7mm}
+.psheet .title{text-align:center;font-weight:700;font-size:1.28em;text-decoration:underline;letter-spacing:.02em;margin:0 0 .3em}
+.psheet .subtitle{text-align:center;font-size:.92em;margin:0 0 .7em;color:#222}
+.psheet .ident{border:1px solid #000;padding:.5em .8em;font-size:.98em;margin-bottom:.9em;text-align:center}
+.psheet .flag{border:1.5px solid #000;padding:.55em .9em;margin:.8em 0;font-weight:700;font-size:1.02em}
+.psheet h3{font-size:1.04em;font-weight:700;margin:1em 0 .35em;border-bottom:1px solid #000;padding-bottom:.2em}
+.psheet ul{margin:0;padding-left:1.5em}
+.psheet li{margin-bottom:.32em}
 .psheet .val{font-weight:700}
-.flag{border:1px solid #000;padding:8px 11px;margin:12px 0;font-weight:700;font-size:11px}
-.psheet .offer{border:1.5px solid #000;padding:11px 13px;margin-top:16px}
-.psheet .offer-hd{font-weight:700;font-size:12px;text-align:center;margin-bottom:5px}
-.psheet .offer-why{font-size:10px;line-height:1.5;text-align:center;margin-bottom:2px}
-
-/* ---- back page ---- */
-.psheet.page2{page-break-before:always}
-.psheet .p2{font-size:10.5px;line-height:1.55;margin:0 0 4px}
-.psheet .small{font-size:9.5px;color:#333}
-.psheet .withdoc{border-left:3px solid #000;padding:8px 11px;margin:10px 0;font-size:10.5px;line-height:1.55;background:#f7f7f7}
-.psheet .revline{margin-top:18px;padding-top:8px;border-top:1px solid #000;font-size:10px}
-.psheet .disc{font-size:9px;color:#333;margin-top:6px}
-.gen{font-size:9px;color:#888;font-style:italic;font-weight:400}
+.psheet p{margin:0 0 .35em}
+.psheet .p2{font-size:1em;margin:0 0 .35em}
+.psheet .withdoc{border-left:4px solid #000;padding:.6em .9em;margin:.85em 0;font-size:.96em;background:#f5f5f5}
+.psheet .revline{margin-top:1.1em;padding-top:.5em;border-top:1px solid #000;font-size:.96em}
+.psheet .disc{font-size:.82em;color:#333;margin-top:.5em;line-height:1.45}
+.psheet .gen{font-size:.8em;color:#888;font-style:italic;font-weight:400}
 
 @media print{
   @page{size:A4;margin:0}
@@ -72,10 +68,9 @@ td.ref{font-family:'IBM Plex Mono',monospace;font-weight:600}
   .noprint{display:none!important}
   .wrap{padding:0;margin:0;max-width:none}
   #sheet{margin:0}
-  /* each page = EXACTLY one A4 sheet. overflow hidden = never a 3rd page */
-  .psheet{width:210mm;height:297mm;overflow:hidden;margin:0;page-break-after:always;page-break-inside:avoid}
-  .psheet:last-child{page-break-after:auto}
-  .psheet.page2{page-break-before:always}
+  /* EXACTLY one A4 sheet. overflow hidden = ultimate failsafe against a 2nd page
+     even if the size is nudged past the fit. */
+  .psheet{width:210mm;height:297mm;overflow:hidden;margin:0;box-shadow:none;page-break-after:auto}
 }
 </style>
 </head>
@@ -164,27 +159,29 @@ function makeSheet(ref){
     });
 }
 
+/* ===================== ONE-PAGE SHEET ===================== */
 function renderSheet(rep, rv){
   var doc=rv.doctor?rv.doctor.data:null;
   var die=rv.dietician?rv.dietician.data:null;
   var yog=rv.yoga?rv.yoga.data:null;
 
-  var flag='';
-  if(doc && doc.triage==='priority')
-    flag='<div class="flag">Yeh report '+esc(doc.window)+' din ke andar apne doctor ko dikhana zaroori hai.</div>';
+  var flag = (doc && doc.triage==='priority')
+    ? '<div class="flag">Yeh report '+esc(doc.window)+' din ke andar apne doctor ko dikhana zaroori hai.</div>' : '';
 
   var pr = doc && doc.primary && doc.primary.length
     ? '<h3>Sabse zaroori</h3><ul>'+doc.primary.map(function(p){return '<li><span class="val">'+esc(p[0])+'</span>'+(p[1]?' — '+esc(p[1]):'')+'</li>'}).join('')+'</ul>' : '';
   var se = doc && doc.secondary && doc.secondary.length
     ? '<h3>Dhyan rakhne wali</h3><ul>'+doc.secondary.map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>' : '';
 
-  /* "chinta ki baat nahi" ONLY when a doctor actually reviewed. No generic version. */
+  /* "chinta ki baat nahi" ONLY when a doctor actually reviewed. Wrapped so the
+     auto-fit can drop it first if an unusually heavy report won't otherwise fit. */
   var normalBlock = (doc && doc.normal)
-    ? '<h3>Chinta ki baat nahi</h3><p>'+esc(doc.normal)+'</p>' : '';
+    ? '<div id="chintaBlock"><h3>Chinta ki baat nahi</h3><p>'+esc(doc.normal)+'</p></div>' : '';
 
-  /* questions: doctor's if present, else general */
-  var qs = (doc && doc.questions && doc.questions.length) ? doc.questions : GENERIC.questions;
+  /* questions: doctor's if present, else general; capped at 4, placed after Dincharya */
+  var qsrc = (doc && doc.questions && doc.questions.length) ? doc.questions : GENERIC.questions;
   var qGen = !(doc && doc.questions && doc.questions.length);
+  var qs = qsrc.slice(0,4);
   var qHtml='<h3>Apne doctor se poochhein '+(qGen?'<span class="gen">(general)</span>':'')+'</h3><ul>'
     +qs.map(function(q){return '<li>'+esc(q)+'</li>'}).join('')+'</ul>';
 
@@ -192,87 +189,105 @@ function renderSheet(rep, rv){
   var dietGen = !(die && die.diet);
   var yogaTxt = yog && yog.yoga ? yog.yoga : GENERIC.yoga;
   var yogaGen = !(yog && yog.yoga);
+  /* keep full text so the cap lever (last resort) can trim/restore without a reload */
+  window.__diet={full:dietTxt};
+  window.__yoga={full:yogaTxt};
 
-  /* Failsafe: cap long reviews so page 2 always fits in one A4 sheet.
-     No upsell — a capped review simply points to the support line. */
-  var CAP=420;   /* chars; ~6 lines. tune if needed */
-  function capReview(t){
-    if(t.length<=CAP) return {text:t, capped:false};
-    var cut=t.slice(0,CAP);
-    var lastStop=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('।'),cut.lastIndexOf(', '));
-    if(lastStop>CAP*0.6) cut=t.slice(0,lastStop+1);
-    return {text:cut.trim(), capped:true};
-  }
-  var dietC=capReview(dietTxt), yogaC=capReview(yogaTxt);
-  var capHook=' <span class="caphook">…iske baare mein reviewing expert se seedhe baat kar sakte hain (number neeche).</span>';
-
-  /* reviewer names WITH role — this is the credibility: real, named professionals */
   var names=[];
   if(rv.doctor && rv.doctor.reviewer) names.push(esc(rv.doctor.reviewer)+' (Doctor)');
   if(rv.dietician && rv.dietician.reviewer) names.push(esc(rv.dietician.reviewer)+' (Dietician)');
   if(rv.yoga && rv.yoga.reviewer) names.push(esc(rv.yoga.reviewer)+' (Yoga Therapist)');
 
-  $('sheet').innerHTML=
-   '<div class="noprint" style="text-align:center;margin:16px 0"><button onclick="window.print()">Print / Save PDF</button>'
-   +'<span style="margin-left:12px;color:var(--muted);font-size:13px">Prints as 2 A4 pages on report stock. In print dialog, uncheck "Headers and footers".</span></div>'
-
-   /* ================= PAGE 1 — clinical, self-sufficient ================= */
-   +'<div class="psheet"><div class="reserved"></div><div class="body">'
+  var sheetHtml=
+   '<div class="psheet" id="psheet"><div class="reserved"></div><div class="body">'
    +'<div class="title">AAPKI REPORT — AASAN BHASHA MEIN</div>'
    +'<div class="subtitle">Ek qualified doctor aur 2 health experts ne aapki report khud dekhkar samjhaayi hai</div>'
-   +'<div class="box">'
-   +'<div>Ref No. : '+esc(rep.Ref||'')+'</div><div>Age/Sex : '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')+'</div>'
-   +'<div>Profile : '+esc(rep.Profile||'')+'</div><div></div>'
-   +'<div style="grid-column:1/-1">Name : '+esc(rep.Patient||'')+'</div></div>'
-   +flag+pr+se+normalBlock+qHtml
-
-   /* credibility + anti free-AI + contact, in one clean box (no offer, no price) */
-   +'<div class="offer">'
-   +'<div class="offer-hd">Yeh review asli qualified logon ne kiya hai — koi automatic ya AI report nahi</div>'
-   +'<div class="offer-why">'
-   +'Internet ya free online/AI tools par report daalkar apne aap matlab nikaalna galat — aur kai baar nuksaandeh — ho sakta hai. '
-   +'Is report ko ek qualified doctor aur 2 health experts ne khud dekha aur aasan bhasha mein samjhaaya hai. '
-   +'Report ke baare mein kuch poochhna ho toh in hi reviewers se seedhe baat karein: <b>'+esc(SUPPORT)+'</b>. '
-   +'Ilaaj ka faisla hamesha aapke apne doctor ka rahega.'
-   +'</div></div>'
-
-   /* pointer to page 2 (diet + lifestyle) */
-   +'<div class="pointer">'
-   +'Aapki report ke hisaab se <b>khane mein kya badlein</b> aur <b>rozana kya karein</b> — '
-   +'yeh salah is sheet ke <b>ANTIM PANNE (last page)</b> par hai. Zaroor dekhein.'
-   +'</div>'
-
-   +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
+   +'<div class="ident">Ref No.: '+esc(rep.Ref||'')+' &nbsp;&middot;&nbsp; Age/Sex: '+esc(rep.Age||'')+' / '+esc(rep.Sex||'')
+     +' &nbsp;&middot;&nbsp; Profile: '+esc(rep.Profile||'')+' &nbsp;&middot;&nbsp; Name: '+esc(rep.Patient||'')+'</div>'
+   +flag+pr+se+normalBlock
+   +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2" id="dietP">'+esc(dietTxt)+'</p>'
+   +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2" id="yogaP">'+esc(yogaTxt)+'</p>'
+   +qHtml
+   +'<div class="withdoc"><b>Baat karni hai?</b> Is report ko dekhne wale qualified doctor aur health experts se seedhe baat karne ke liye: '
+     +'<b>'+esc(SUPPORT)+'</b>. Yeh koi automatic ya AI service nahi — asli qualified log.</div>'
+   +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; '):'')+'</div>'
    +'<div class="disc">Yeh diagnosis nahi hai. Ilaaj ka faisla hamesha aapke doctor ka hoga. '
-   +'Is report ko dekhne wale medical experts ek independent clinical review team ki tarah kaam karte hain, '
-   +'kisi bhi dawai ya diagnostic lab se swatantra. Aapki jaankari private rehti hai.</div>'
-   +'</div></div>'
-
-   /* ================= PAGE 2 — experts\' work + contact ================= */
-   +'<div class="psheet page2"><div class="reserved"></div><div class="body">'
-
-   /* the diet/yoga reviews — capped so page 2 stays one sheet */
-   +'<h3>Khane mein '+(dietGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(dietC.text)+(dietC.capped?capHook:'')+'</p>'
-   +'<h3>Dincharya mein '+(yogaGen?'<span class="gen">(general)</span>':'')+'</h3><p class="p2">'+esc(yogaC.text)+(yogaC.capped?capHook:'')+'</p>'
-
-   +'<h3>Ek report se pata chalta hai — badalta nahi</h3>'
-   +'<p class="p2">Values ek din mein nahi bantin. Jo cheezein farak laati hain — khana, neend, tanaav, '
-   +'dincharya, aur dawai ka sahi asar — unme <b>2 se 3 mahine</b> lagte hain. '
-   +'Isiliye agli jaanch apne doctor ki salah ke hisaab se karwaayein aur badlaav par nazar rakhein.</p>'
-
-   /* contact repeated here in case the two pages get separated — neutral, no offer */
-   +'<div class="withdoc">'
-   +'<b>Baat karni hai?</b> Is report ko dekhne wale qualified doctor aur health experts se seedhe baat karne ke liye: '
-   +'<b>'+esc(SUPPORT)+'</b>. Yeh koi automatic ya AI service nahi — asli qualified log.'
-   +'</div>'
-
-   +'<div class="revline">'+(names.length?'Review by: '+names.join(' &nbsp; ')+'':'')+'</div>'
-   +'<div class="disc">Is report ko dekhne wale medical experts ek independent clinical review team ki tarah kaam karte hain — '
-   +'hamara poora dhyan sirf aapki report ke data ko sahi tareeke se samajhne par hota hai. '
-   +'Salah dene mein hum kisi bhi dawai ya diagnostic lab se poori tarah swatantra (independent) hain. '
-   +'Aapki jaankari private rehti hai.</div>'
+     +'Is report ko dekhne wale medical experts ek independent clinical review team ki tarah kaam karte hain — '
+     +'hamara dhyan sirf aapki report ke data ko sahi tareeke se samajhne par hota hai, aur salah dene mein hum '
+     +'kisi bhi dawai ya diagnostic lab se poori tarah swatantra (independent) hain. Aapki jaankari private rehti hai.</div>'
    +'</div></div>';
+
+  $('sheet').innerHTML=
+     '<div class="noprint" style="text-align:center;margin:16px 0">'
+       +'<button onclick="window.print()">Print / Save PDF</button>'
+       +'<span style="margin-left:12px;color:var(--muted);font-size:13px">Prints as 1 A4 page on report stock. In print dialog, uncheck "Headers and footers".</span>'
+     +'</div>'
+     +'<div class="fitbar noprint">'
+       +'<span class="fl">Text size</span>'
+       +'<button type="button" class="fb" onclick="nudgeSize(-0.5)">−</button>'
+       +'<input type="range" id="fsize" min="10" max="24" step="0.5" oninput="setSize(this.value)">'
+       +'<button type="button" class="fb" onclick="nudgeSize(0.5)">+</button>'
+       +'<span id="fsval" class="fl mono">—</span>'
+       +'<button type="button" class="ghost fb2" onclick="autoFitSheet()">Optimum</button>'
+       +'<span id="fitmsg" class="fl"></span>'
+     +'</div>'
+     +sheetHtml;
+
+  autoFitSheet();
   $('sheet').scrollIntoView({behavior:'smooth'});
+}
+
+/* ===================== AUTO-FIT + MANUAL CONTROL ===================== */
+var MMPX=96/25.4;                 /* CSS px per mm at 96dpi */
+var PAGE_PX=297*MMPX;             /* full A4 height */
+var SAFETY_MM=3;                  /* leave a hair of slack below the sheet box */
+var AVAIL_PX=(297-SAFETY_MM)*MMPX;
+var CEIL=18, FLOOR=12;            /* auto size stays legible; manual slider goes 10–24 */
+
+function sheetEl(){return $('psheet')}
+function fitsAt(px){var s=sheetEl();if(!s)return true;s.style.fontSize=px+'px';return s.offsetHeight<=AVAIL_PX}
+function setChinta(show){var c=$('chintaBlock');if(c)c.style.display=show?'':'none'}
+function capText(t){
+  var CAP=420;if(t.length<=CAP)return t;
+  var cut=t.slice(0,CAP),st=Math.max(cut.lastIndexOf('. '),cut.lastIndexOf('।'),cut.lastIndexOf(', '));
+  if(st>CAP*0.6)cut=t.slice(0,st+1);
+  return cut.trim()+' …';
+}
+function setCap(on){
+  var d=$('dietP'),y=$('yogaP');
+  if(d)d.innerHTML=esc(on?capText(window.__diet.full):window.__diet.full);
+  if(y)y.innerHTML=esc(on?capText(window.__yoga.full):window.__yoga.full);
+}
+function searchSize(){
+  var lo=FLOOR,hi=CEIL,best=FLOOR;fitsAt(FLOOR);
+  for(var i=0;i<16;i++){var m=(lo+hi)/2;if(fitsAt(m)){best=m;lo=m}else hi=m}
+  return best;
+}
+/* fill the page with the largest legible size; if a very heavy report still
+   won't fit at the floor, drop "Chinta ki baat nahi", then trim the reviews. */
+function autoFitSheet(){
+  if(!sheetEl())return;
+  setChinta(true);setCap(false);
+  var b=searchSize();
+  if(!fitsAt(FLOOR)){ setChinta(false); b=searchSize(); }
+  if(!fitsAt(FLOOR)){ setCap(true);     b=searchSize(); }
+  applySize(b,true);
+}
+function applySize(px,isAuto){
+  var s=sheetEl();if(!s)return;
+  px=Math.max(10,Math.min(24,Math.round(px*2)/2));
+  s.style.fontSize=px+'px';
+  var sl=$('fsize');if(sl)sl.value=px;
+  var lbl=$('fsval');if(lbl)lbl.textContent=px.toFixed(1)+'px'+(isAuto?' · optimum':'');
+  updateFit();
+}
+function setSize(v){applySize(parseFloat(v),false)}
+function nudgeSize(d){var sl=$('fsize');if(sl)applySize(parseFloat(sl.value)+d,false)}
+function updateFit(){
+  var s=sheetEl(),m=$('fitmsg');if(!s||!m)return;
+  var over=s.offsetHeight>PAGE_PX+1;
+  m.textContent=over?'⚠ 1 page se zyada — print par neeche cut ho sakta hai':'✓ fits 1 page';
+  m.style.color=over?'var(--red)':'var(--ok)';
 }
 </script>
 </body>
